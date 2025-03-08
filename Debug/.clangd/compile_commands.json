@@ -1,0 +1,12 @@
+[
+   {
+      "directory" : "C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug",
+      "command"   : "clang++ -D__MSPM0G1107__ -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor\" -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug\" -I\"C:/ti/mspm0_sdk_2_04_00_06/source/third_party/CMSIS/Core/Include\" -I\"C:/ti/mspm0_sdk_2_04_00_06/source\" -I\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/newlib-nano\" -I\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1/arm-none-eabi\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1/backward\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/lib/gcc/arm-none-eabi/9.2.1/include\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/lib/gcc/arm-none-eabi/9.2.1/include-fixed\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include\" -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug/syscfg\"",
+      "file"      : "C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug/syscfg/ti_msp_dl_config.c"
+   },
+   {
+      "directory" : "C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug",
+      "command"   : "clang++ -D__MSPM0G1107__ -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor\" -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug\" -I\"C:/ti/mspm0_sdk_2_04_00_06/source/third_party/CMSIS/Core/Include\" -I\"C:/ti/mspm0_sdk_2_04_00_06/source\" -I\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/newlib-nano\" -I\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1/arm-none-eabi\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include/c++/9.2.1/backward\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/lib/gcc/arm-none-eabi/9.2.1/include\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/lib/gcc/arm-none-eabi/9.2.1/include-fixed\" -isystem\"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/include\" -I\"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug/syscfg\"",
+      "file"      : "C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/EMG-BatchelorsThesis.c"
+   }
+]
