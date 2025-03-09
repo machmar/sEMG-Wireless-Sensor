@@ -82,19 +82,49 @@ extern "C" {
 #define ADC12_0_INST                                                        ADC0
 #define ADC12_0_INST_IRQHandler                                  ADC0_IRQHandler
 #define ADC12_0_INST_INT_IRQN                                    (ADC0_INT_IRQn)
-#define ADC12_0_ADCMEM_0                                      DL_ADC12_MEM_IDX_0
-#define ADC12_0_ADCMEM_0_REF                   DL_ADC12_REFERENCE_VOLTAGE_INTREF
-#define ADC12_0_ADCMEM_0_REF_VOLTAGE_V                                      1.40
+#define ADC12_0_ADCMEM_BATTERY_VOLTAGE                        DL_ADC12_MEM_IDX_0
+#define ADC12_0_ADCMEM_BATTERY_VOLTAGE_REF       DL_ADC12_REFERENCE_VOLTAGE_INTREF
+#define ADC12_0_ADCMEM_BATTERY_VOLTAGE_REF_VOLTAGE_V                                    1.40
+#define ADC12_0_ADCMEM_INAMP_DIFFERENTIAL                      DL_ADC12_MEM_IDX_1
+#define ADC12_0_ADCMEM_INAMP_DIFFERENTIAL_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
+#define ADC12_0_ADCMEM_INAMP_DIFFERENTIAL_REF_VOLTAGE_V                                     3.3
+#define ADC12_0_ADCMEM_INAMP_REFFERENCE                       DL_ADC12_MEM_IDX_2
+#define ADC12_0_ADCMEM_INAMP_REFFERENCE_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
+#define ADC12_0_ADCMEM_INAMP_REFFERENCE_REF_VOLTAGE_V                                     3.3
+#define GPIO_ADC12_0_C2_PORT                                               GPIOA
+#define GPIO_ADC12_0_C2_PIN                                       DL_GPIO_PIN_25
+#define GPIO_ADC12_0_C1_PORT                                               GPIOA
+#define GPIO_ADC12_0_C1_PIN                                       DL_GPIO_PIN_26
 
 
 /* Defines for VREF */
 #define VREF_VOLTAGE_MV                                                     1400
 #define GPIO_VREF_VREFPOS_PORT                                             GPIOA
-#define GPIO_VREF_VREFPOS_PIN                                     DL_GPIO_PIN_23
-#define GPIO_VREF_IOMUX_VREFPOS                                  (IOMUX_PINCM53)
-#define GPIO_VREF_IOMUX_VREFPOS_FUNC                IOMUX_PINCM53_PF_UNCONNECTED
+#define GPIO_VREF_VREFPOS_PIN                                     DL_GPIO_PIN_21
+#define GPIO_VREF_IOMUX_VREFPOS                                  (IOMUX_PINCM46)
+#define GPIO_VREF_IOMUX_VREFPOS_FUNC                IOMUX_PINCM46_PF_UNCONNECTED
 
 
+
+
+/* Port definition for Pin Group LED */
+#define LED_PORT                                                         (GPIOA)
+
+/* Defines for RED_LED: GPIOA.10 with pinCMx 21 on package pin 9 */
+#define LED_RED_LED_PIN                                         (DL_GPIO_PIN_10)
+#define LED_RED_LED_IOMUX                                        (IOMUX_PINCM21)
+/* Defines for YELLOW_LED: GPIOA.11 with pinCMx 22 on package pin 10 */
+#define LED_YELLOW_LED_PIN                                      (DL_GPIO_PIN_11)
+#define LED_YELLOW_LED_IOMUX                                     (IOMUX_PINCM22)
+/* Port definition for Pin Group INAMP */
+#define INAMP_PORT                                                       (GPIOA)
+
+/* Defines for INAMP_ENABLE: GPIOA.23 with pinCMx 53 on package pin 19 */
+#define INAMP_INAMP_ENABLE_PIN                                  (DL_GPIO_PIN_23)
+#define INAMP_INAMP_ENABLE_IOMUX                                 (IOMUX_PINCM53)
+/* Defines for INAMP_LEAD_OFF: GPIOA.24 with pinCMx 54 on package pin 20 */
+#define INAMP_INAMP_LEAD_OFF_PIN                                (DL_GPIO_PIN_24)
+#define INAMP_INAMP_LEAD_OFF_IOMUX                               (IOMUX_PINCM54)
 
 /* clang-format on */
 
@@ -104,6 +134,7 @@ void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_ADC12_0_init(void);
 void SYSCFG_DL_VREF_init(void);
+
 
 
 #ifdef __cplusplus

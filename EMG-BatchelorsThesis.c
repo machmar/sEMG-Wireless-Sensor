@@ -35,49 +35,28 @@
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 
 uint8_t tmp = 1;
+uint32_t tmp_cnt = 0;
 bool dir = 0;
 
 int main(void)
 {
     SYSCFG_DL_init();
 
-    // reset the GPIO
-    GPIOA->GPRCM.RSTCTL = (0xB1 << 24) | 0b11;
-    delay_cycles(16);
-    // enable power to the GPIO
-    GPIOA->GPRCM.PWREN = (0x26 << 24) | 0b1;
-    delay_cycles(16);
-    // set the iomux to enable the GPIO
-    IOMUX->SECCFG.PINCM[20] = 0x00000001 | (1 << 7) | (1 << 20); //FUNCTION = 1, PC = 1, DRV = 1
-    IOMUX->SECCFG.PINCM[21] = 0x00000001 | (1 << 7) | (1 << 20); //FUNCTION = 1, PC = 1, DRV = 1
-    IOMUX->SECCFG.PINCM[52] = 0x00000001 | (1 << 7); //FUNCTION = 1 (INAMP ENABLE PIN), PC = 1
-    IOMUX->SECCFG.PINCM[53] = 0x00000001 | (1 << 7) | (1 << 18) | (1 << 19); //FUNCTION = 1 (INAMP ELECTRODE OFF PIN), PC = 1,  INENA = 1, HYSTEN = 1
-    delay_cycles(16);
-    // set gpio as output
-    GPIOA->DOESET31_0 = 0b11 << 10;
-
-    // set inamp enable high
-    GPIOA->DOESET31_0 = 1 << 23;
-    GPIOA->DOUTSET31_0 = 1 << 23;
-    delay_cycles(100); // bit of time to settle
-
-    // set inamp electrode off as input
-    GPIOA->DOECLR31_0 = 1 << 24;
-    delay_cycles(16);
-
     tmp = 1;
 
     while (1) {
-        GPIOA->DOUTTGL31_0 = 0b1 << 11;  // blink the yellow
-        if (!dir) {
-            if (tmp < 30) tmp++;
-            else dir = 1;
+        if (!(tmp_cnt & 0xfffff)) {
+            GPIOA->DOUTTGL31_0 = 0b1 << 11;  // blink the yellow
+            if (!dir) {
+                if (tmp < 30) tmp++;
+                else dir = 1;
+            }
+            else {
+                if (tmp > 1) tmp--;
+                else dir = 0;
+            }
         }
-        else {
-            if (tmp > 1) tmp--;
-            else dir = 0;
-        }
-        //delay_cycles(tmp * 100000);
+        tmp_cnt += tmp;
 
         if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
             GPIOA->DOUTSET31_0 = 1 << 10;
