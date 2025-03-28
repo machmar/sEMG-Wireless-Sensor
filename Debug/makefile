@@ -139,7 +139,7 @@ all: $(OBJS) $(GEN_CMDS)
 EMG-BatchelorsThesis.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: GNU Linker'
-	"C:/ti/gcc_arm_none_eabi_9_2_1/bin/arm-none-eabi-gcc-9.2.1.exe" @"syscfg/device.opt"  -O2 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mthumb -mfloat-abi=soft -Wl,-Map,"EMG-BatchelorsThesis.map" -nostartfiles -static -Wl,--gc-sections -L"C:/Users/marec/Documents/GitHub/sEMG-Wireless-Sensor/Debug/syscfg" -L"C:/ti/mspm0_sdk_2_04_00_06/source" -L"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp" -march=armv6-m -mthumb -o"EMG-BatchelorsThesis.out" $(ORDERED_OBJS)
+	"C:/ti/gcc_arm_none_eabi_9_2_1/bin/arm-none-eabi-gcc-9.2.1.exe" @"syscfg/device.opt"  -O2 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mthumb -mfloat-abi=soft -Wl,-Map,"EMG-BatchelorsThesis.map" -nostartfiles -static -Wl,--gc-sections -L"C:/Users/marec/workspace_ccstheia/EMG-BatchelorsThesis/sEMG-Wireless-Sensor/Debug/syscfg" -L"C:/ti/mspm0_sdk_2_04_00_06/source" -L"C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp" -march=armv6-m -mthumb -o"EMG-BatchelorsThesis.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

@@ -30,39 +30,64 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/driverlib/dl_gpio.h"
 #include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
 #include "ti/devices/msp/m0p/mspm0g110x.h"
+//#include <cstdint>
 
-uint8_t tmp = 1;
-uint32_t tmp_cnt = 0;
-bool dir = 0;
+#define SPI_CS_LOW (GPIOB->DOUTCLR31_0 = 1 << 4)
+#define SPI_CS_HIGH (GPIOB->DOUTSET31_0 = 1 << 4)
+#define SPI_WAIT_TRANSFER_COMPLETE while(SPI0->STAT & SPI_STAT_BUSY_MASK)
+#define SPI_WAIT_FIFO_NOT_FULL while(~SPI0->STAT & (1 << SPI_STAT_TFE_MASK))
+#define SPI_DATA(x) (SPI0->TXDATA = (x))
+#define NRF_CE_HIGH (GPIOB->DOUTSET31_0 = 1 << 3)
+#define NRF_CE_LOW (GPIOB->DOUTCLR31_0 = 1 << 3)
+
+uint32_t volatile GotBack = 0; // idk how big the fifo is lol (I think it's 5 tho)
+uint32_t cnt = 0;
 
 int main(void)
 {
-    SYSCFG_DL_init();
+    delay_cycles(1000000); // leave room for the power to stabilize and all
 
-    tmp = 1;
+    SYSCFG_DL_init();
+    NVIC->ICPR[0] = 1 << GPIOA_INT_IRQn; // clear the interrupt state before enabling it
+    NVIC->ISER[0] = 1 << GPIOA_INT_IRQn; // both ports fall into the same interrupt for some reason
+    NVIC->ICPR[0] = 1 << SPI0_INT_IRQn; // clear the interrupt state before enabling it
+    NVIC->ISER[0] = 1 << SPI0_INT_IRQn; // enable interrupts for SPI0
+
+    SPI_CS_LOW;
+    SPI_DATA(0xff);
 
     while (1) {
-        if (!(tmp_cnt & 0xfffff)) {
-            GPIOA->DOUTTGL31_0 = 0b1 << 11;  // blink the yellow
-            if (!dir) {
-                if (tmp < 30) tmp++;
-                else dir = 1;
-            }
-            else {
-                if (tmp > 1) tmp--;
-                else dir = 0;
-            }
-        }
-        tmp_cnt += tmp;
-
+        
         if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
-            GPIOA->DOUTSET31_0 = 1 << 10;
+            GPIOA->DOUTSET31_0 = 1 << 0;
         }
         else { // leads are both on
-            GPIOA->DOUTCLR31_0 = 1 << 10;
+             GPIOA->DOUTCLR31_0 = 1 << 0;
         }
+
+        if (!cnt++) {
+            GPIOA->DOUTTGL31_0 = 0b1 << 1;  // blink the yellow
+            SPI_CS_LOW;
+            SPI_DATA(0xff);
+            SPI_WAIT_TRANSFER_COMPLETE;
+        }
+            if (cnt >= UINT16_MAX * 30) cnt = 0;
     }
+}
+
+void GROUP1_IRQHandler() {
+    switch (GPIOA->CPU_INT.IIDX) {
+    case DL_GPIO_IIDX_DIO2: // IRQ falling edge
+        GPIOA->DOUTTGL31_0 = 0b1 << 1;  // blink the yellow
+        return;
+    }
+}
+
+void SPI0_IRQHandler() {
+    SPI_CS_HIGH;
+    GotBack = SPI0->RXDATA;
 }
