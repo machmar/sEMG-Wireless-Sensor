@@ -36,13 +36,13 @@
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 //#include <cstdint>
 
-#define SPI_CS_LOW (GPIOB->DOUTCLR31_0 = 1 << 4)
-#define SPI_CS_HIGH (GPIOB->DOUTSET31_0 = 1 << 4)
+#define SPI_CS_LOW (GPIOA->DOUTCLR31_0 = 1 << 4)
+#define SPI_CS_HIGH (GPIOA->DOUTSET31_0 = 1 << 4)
 #define SPI_WAIT_TRANSFER_COMPLETE while(SPI0->STAT & SPI_STAT_BUSY_MASK)
 #define SPI_WAIT_FIFO_NOT_FULL while(~SPI0->STAT & (1 << SPI_STAT_TFE_MASK))
 #define SPI_DATA(x) (SPI0->TXDATA = (x))
-#define NRF_CE_HIGH (GPIOB->DOUTSET31_0 = 1 << 3)
-#define NRF_CE_LOW (GPIOB->DOUTCLR31_0 = 1 << 3)
+#define NRF_CE_HIGH (GPIOA->DOUTSET31_0 = 1 << 3)
+#define NRF_CE_LOW (GPIOA->DOUTCLR31_0 = 1 << 3)
 
 uint32_t volatile GotBack = 0; // idk how big the fifo is lol (I think it's 5 tho)
 uint32_t cnt = 0;
