@@ -30,6 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/devices/msp/peripherals/hw_adc12.h"
 #include "ti/driverlib/dl_gpio.h"
 #include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
@@ -48,6 +49,8 @@ int main(void)
     NVIC->ISER[0] = 1 << GPIOA_INT_IRQn; // both ports fall into the same interrupt for some reason
     NVIC->ICPR[0] = 1 << SPI0_INT_IRQn; // clear the interrupt state before enabling it
     NVIC->ISER[0] = 1 << SPI0_INT_IRQn; // enable interrupts for SPI0
+
+    ADC0->ULLMEM.CTL1 |= 1 << 8; // start ADC conversions
 
     // init the nrf with basic settings
     for (uint32_t i = 0; i < (NRF_INIT_REGS_LENGTH - 1); i += 2) {
@@ -70,6 +73,11 @@ int main(void)
             break;
         }
     }
+    if (!regsCorrect) {
+        // do something to signalize issue with init
+        //__asm__ volatile(".inst 0xe7f001f0"); // should trigger a breakpoint but doesn't
+    }
+
     // enable tranmission, set adresses fro transmit and receive pipes (for ack)
     for (uint32_t i = 0; i < (NRF_TRANSMIT_REGS_LENGTH - 1); i += 2) {
         SPI_CS_LOW;
@@ -133,7 +141,7 @@ int main(void)
             // transmit the payload
             SPI_CS_LOW;
             SPI_DATA(0xA0);
-            SPI_DATA(0x01);
+            SPI_DATA(ADC0->ULLMEM.MEMRES[1] >> (12 - 8));
             SPI_WAIT_TRANSFER_COMPLETE;
             // send it
             NRF_CE_HIGH;
