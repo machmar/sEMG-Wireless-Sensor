@@ -36,9 +36,10 @@
 #include "ti_msp_dl_config.h"
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 #include "Hardware.h"
-#include "NRF_driver.h"
+#include "NRFDriver.h"
 
 uint32_t cnt = 0;
+uint8_t tmp_data_[5] = "ahoj";
 
 int main(void)
 {
@@ -52,69 +53,19 @@ int main(void)
 
     ADC0->ULLMEM.CTL1 |= 1 << 8; // start ADC conversions
 
-    // init the nrf with basic settings
-    for (uint32_t i = 0; i < (NRF_INIT_REGS_LENGTH - 1); i += 2) {
-        HW_NRF_CS_CLR;
-        SPI_DATA(NrfInitRegs[i]);
-        SPI_DATA(NrfInitRegs[i + 1]);
-        SPI_WAIT_TRANSFER_COMPLETE;
-    }
-    // check the reg states
-    bool volatile regsCorrect = true;
-    uint32_t volatile failedReg = UINT32_MAX;
-    for (uint32_t i = 0; i < (NRF_INIT_REGS_CHECK_LENGTH); i++) {
-        HW_NRF_CS_CLR;
-        SPI_DATA(NrfInitRegsCheck[i]);
-        SPI_DATA(0x00);
-        SPI_WAIT_TRANSFER_COMPLETE;
-        if (GotBack[1] != NrfInitRegsCheckValid[i]) {
-            regsCorrect = false; 
-            failedReg = i;
-            break;
-        }
-    }
-    if (!regsCorrect) {
+    if (!NRF_Init()) {
         while(1) { // nrf init gone bad, stop dead
             HW_LED_RED_TGL;
             for (uint32_t i = 0; i < 200000; i++);
         }
     }
 
-    // enable tranmission, set adresses fro transmit and receive pipes (for ack)
-    for (uint32_t i = 0; i < (NRF_TRANSMIT_REGS_LENGTH - 1); i += 2) {
-        HW_NRF_CS_CLR;
-        SPI_DATA(NrfTransmitRegs[i]);
-        SPI_DATA(NrfTransmitRegs[i + 1]);
-        SPI_WAIT_TRANSFER_COMPLETE;
+    if (!NRF_TXPipe(0x0123456789)) {
+        while(1) { // nrf init gone bad, stop dead
+            HW_LED_RED_TGL;
+            for (uint32_t i = 0; i < 200000; i++);
+        }
     }
-    // out pipe address
-    HW_NRF_CS_CLR;
-    SPI_DATA(0x30);
-    SPI_DATA(0x01);
-    SPI_DATA(0x23);
-    SPI_DATA(0x45);
-    SPI_DATA(0x67);
-    SPI_WAIT_FIFO_NOT_FULL; // wait till theres space in the fifo
-    SPI_DATA(0x89);
-    SPI_WAIT_TRANSFER_COMPLETE;
-    // in pipe address (using pipe 0)
-    HW_NRF_CS_CLR;
-    SPI_DATA(0x2A);
-    SPI_DATA(0x01);
-    SPI_DATA(0x23);
-    SPI_DATA(0x45);
-    SPI_DATA(0x67);
-    SPI_WAIT_FIFO_NOT_FULL; // wait till theres space in the fifo
-    SPI_DATA(0x89);
-    SPI_WAIT_TRANSFER_COMPLETE;
-    // SET TX, enable interrupt, clear fifo
-    HW_NRF_CS_CLR;
-    SPI_DATA(0x20);
-    SPI_DATA(0x5E);
-    SPI_WAIT_TRANSFER_COMPLETE;
-    HW_NRF_CS_CLR;
-    SPI_DATA(0xE1);
-    SPI_WAIT_TRANSFER_COMPLETE;
 
     while (1) {
         
@@ -126,46 +77,21 @@ int main(void)
         }
 
         if (!cnt++) {
-            //GPIOA->DOUTTGL31_0 = 0b1 << 1;  // blink the yellow
-            // clear interrupts, go to standby
-            HW_NRF_CS_CLR;
-            SPI_DATA(0x27);
-            SPI_DATA(0x70);
-            SPI_WAIT_TRANSFER_COMPLETE;
-            HW_NRF_CS_CLR;
-            SPI_DATA(0x20);
-            SPI_DATA(0x5E);
-            SPI_WAIT_TRANSFER_COMPLETE;
-            // flush TX fifo
-            HW_NRF_CS_CLR;
-            SPI_DATA(0xE1);
-            SPI_WAIT_TRANSFER_COMPLETE;
-            // transmit the payload
-            HW_NRF_CS_CLR;
-            SPI_DATA(0xA0);
-            SPI_DATA(ADC0->ULLMEM.MEMRES[1] >> (12 - 8));
-            SPI_WAIT_TRANSFER_COMPLETE;
-            // send it
-            HW_NRF_CE_SET;
-            delay_cycles(1000);
-            HW_NRF_CE_CLR;
-            /*HW_NRF_CS_CLR;
-            SPI_DATA(0xff);
-            SPI_WAIT_TRANSFER_COMPLETE;*/
+            NRF_TXSetData(tmp_data_, 2);
+            NRF_TXTransmit();
         }
-            if (cnt >= UINT16_MAX * 30) cnt = 0;
+        if (cnt >= UINT16_MAX * 30) cnt = 0;
+    }
+}
+
+void GROUP1_IRQHandler() {
+    switch (GPIOA->CPU_INT.IIDX) {
+    case DL_GPIO_IIDX_DIO2: // IRQ falling edge
+        NRF_IRQHandler();
+        return;
     }
 }
 
 void SPI0_IRQHandler() {
-    HW_NRF_CS_SET;
-
-    for (uint32_t i = 0; i < 5; i++) {
-        if (~SPI0->STAT & SPI_STAT_RFE_EMPTY) { // fifo is empty
-            GotBack[i] = SPI0->RXDATA;
-        }
-        else {
-            GotBack[i] = 0;
-        }
-    }
+    NRF_SPIHandler();
 }

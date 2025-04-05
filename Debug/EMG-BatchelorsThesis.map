@@ -16,12 +16,22 @@ gSPI_NRFBackup      0x28              ./syscfg/ti_msp_dl_config.o
 
 Discarded input sections
 
- .text.NRF_Init
-                0x00000000      0x210 ./EMG-BatchelorsThesis.o
  .text.SYSCFG_DL_saveConfiguration
                 0x00000000       0x14 ./syscfg/ti_msp_dl_config.o
  .text.SYSCFG_DL_restoreConfiguration
                 0x00000000       0x14 ./syscfg/ti_msp_dl_config.o
+ .text.GoStandby
+                0x00000000       0x50 ./NRFDriver.o
+ .text.FlushFIFOTX
+                0x00000000       0x2c ./NRFDriver.o
+ .text.FlushFIFORX
+                0x00000000       0x2c ./NRFDriver.o
+ .text.FlushFIFOs
+                0x00000000       0x48 ./NRFDriver.o
+ .text.NRF_TXCheckAcks
+                0x00000000       0x50 ./NRFDriver.o
+ .text.NRF_TXCheckAcksBlocking
+                0x00000000       0x64 ./NRFDriver.o
  .text.DL_ADC12_getClockConfig
                 0x00000000       0x30 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
  .text.DL_SPI_getClockConfig
@@ -81,6 +91,7 @@ Linker script and memory map
 LOAD ./EMG-BatchelorsThesis.o
 LOAD ./syscfg/ti_msp_dl_config.o
 LOAD ./startup_mspm0g110x_gcc.o
+LOAD ./NRFDriver.o
                 0x00000000                _Min_Heap_Size = 0x0
                 0x00000080                _Min_Stack_Size = 0x80
                 0x00000000                PROVIDE (_intvecs_base_address = DEFINED (_intvecs_base_address)?_intvecs_base_address:0x0)
@@ -94,237 +105,277 @@ LOAD ./startup_mspm0g110x_gcc.o
 .vtable
  *(.vtable)
 
-.text           0x000000c0      0x720
+.text           0x000000c0      0xa90
  CREATE_OBJECT_SYMBOLS
  *(.text)
  .text          0x000000c0        0x0 ./EMG-BatchelorsThesis.o
  .text          0x000000c0        0x0 ./syscfg/ti_msp_dl_config.o
  .text          0x000000c0        0x0 ./startup_mspm0g110x_gcc.o
+ .text          0x000000c0        0x0 ./NRFDriver.o
  .text          0x000000c0        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
  .text          0x000000c0        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
  .text          0x000000c0        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
  .text          0x000000c0        0x0 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
                 0x000000c0                . = ALIGN (0x8)
  *(.text.*)
- .text.GROUP1_IRQHandler
-                0x000000c0       0x1c ./EMG-BatchelorsThesis.o
-                0x000000c0                GROUP1_IRQHandler
  .text.startup.main
-                0x000000dc      0x33c ./EMG-BatchelorsThesis.o
-                0x000000dc                main
+                0x000000c0       0xfc ./EMG-BatchelorsThesis.o
+                0x000000c0                main
+ .text.GROUP1_IRQHandler
+                0x000001bc       0x1c ./EMG-BatchelorsThesis.o
+                0x000001bc                GROUP1_IRQHandler
  .text.SPI0_IRQHandler
-                0x00000418       0x4c ./EMG-BatchelorsThesis.o
-                0x00000418                SPI0_IRQHandler
+                0x000001d8        0x8 ./EMG-BatchelorsThesis.o
+                0x000001d8                SPI0_IRQHandler
  .text.SYSCFG_DL_initPower
-                0x00000464       0x3c ./syscfg/ti_msp_dl_config.o
-                0x00000464                SYSCFG_DL_initPower
+                0x000001e0       0x3c ./syscfg/ti_msp_dl_config.o
+                0x000001e0                SYSCFG_DL_initPower
  .text.SYSCFG_DL_GPIO_init
-                0x000004a0       0x94 ./syscfg/ti_msp_dl_config.o
-                0x000004a0                SYSCFG_DL_GPIO_init
+                0x0000021c       0x94 ./syscfg/ti_msp_dl_config.o
+                0x0000021c                SYSCFG_DL_GPIO_init
  .text.SYSCFG_DL_SYSCTL_init
-                0x00000534       0x38 ./syscfg/ti_msp_dl_config.o
-                0x00000534                SYSCFG_DL_SYSCTL_init
+                0x000002b0       0x38 ./syscfg/ti_msp_dl_config.o
+                0x000002b0                SYSCFG_DL_SYSCTL_init
  .text.SYSCFG_DL_SPI_NRF_init
-                0x0000056c       0x68 ./syscfg/ti_msp_dl_config.o
-                0x0000056c                SYSCFG_DL_SPI_NRF_init
+                0x000002e8       0x68 ./syscfg/ti_msp_dl_config.o
+                0x000002e8                SYSCFG_DL_SPI_NRF_init
  .text.SYSCFG_DL_ADC12_0_init
-                0x000005d4       0x70 ./syscfg/ti_msp_dl_config.o
-                0x000005d4                SYSCFG_DL_ADC12_0_init
+                0x00000350       0x70 ./syscfg/ti_msp_dl_config.o
+                0x00000350                SYSCFG_DL_ADC12_0_init
  .text.SYSCFG_DL_init
-                0x00000644       0x24 ./syscfg/ti_msp_dl_config.o
-                0x00000644                SYSCFG_DL_init
+                0x000003c0       0x24 ./syscfg/ti_msp_dl_config.o
+                0x000003c0                SYSCFG_DL_init
  .text.Default_Handler
-                0x00000668        0x4 ./startup_mspm0g110x_gcc.o
-                0x00000668                TIMG6_IRQHandler
-                0x00000668                TIMG8_IRQHandler
-                0x00000668                I2C0_IRQHandler
-                0x00000668                HardFault_Handler
-                0x00000668                SysTick_Handler
-                0x00000668                PendSV_Handler
-                0x00000668                NMI_Handler
-                0x00000668                I2C1_IRQHandler
-                0x00000668                UART1_IRQHandler
-                0x00000668                TIMA1_IRQHandler
-                0x00000668                UART0_IRQHandler
-                0x00000668                ADC0_IRQHandler
-                0x00000668                SPI1_IRQHandler
-                0x00000668                TIMG0_IRQHandler
-                0x00000668                ADC1_IRQHandler
-                0x00000668                RTC_IRQHandler
-                0x00000668                GROUP0_IRQHandler
-                0x00000668                UART2_IRQHandler
-                0x00000668                Default_Handler
-                0x00000668                SVC_Handler
-                0x00000668                TIMG12_IRQHandler
-                0x00000668                TIMG7_IRQHandler
-                0x00000668                DMA_IRQHandler
-                0x00000668                TIMA0_IRQHandler
-                0x00000668                UART3_IRQHandler
+                0x000003e4        0x4 ./startup_mspm0g110x_gcc.o
+                0x000003e4                TIMG6_IRQHandler
+                0x000003e4                TIMG8_IRQHandler
+                0x000003e4                I2C0_IRQHandler
+                0x000003e4                HardFault_Handler
+                0x000003e4                SysTick_Handler
+                0x000003e4                PendSV_Handler
+                0x000003e4                NMI_Handler
+                0x000003e4                I2C1_IRQHandler
+                0x000003e4                UART1_IRQHandler
+                0x000003e4                TIMA1_IRQHandler
+                0x000003e4                UART0_IRQHandler
+                0x000003e4                ADC0_IRQHandler
+                0x000003e4                SPI1_IRQHandler
+                0x000003e4                TIMG0_IRQHandler
+                0x000003e4                ADC1_IRQHandler
+                0x000003e4                RTC_IRQHandler
+                0x000003e4                GROUP0_IRQHandler
+                0x000003e4                UART2_IRQHandler
+                0x000003e4                Default_Handler
+                0x000003e4                SVC_Handler
+                0x000003e4                TIMG12_IRQHandler
+                0x000003e4                TIMG7_IRQHandler
+                0x000003e4                DMA_IRQHandler
+                0x000003e4                TIMA0_IRQHandler
+                0x000003e4                UART3_IRQHandler
  .text.Reset_Handler
-                0x0000066c       0x8c ./startup_mspm0g110x_gcc.o
-                0x0000066c                Reset_Handler
+                0x000003e8       0x8c ./startup_mspm0g110x_gcc.o
+                0x000003e8                Reset_Handler
  .text.initStub
-                0x000006f8        0x4 ./startup_mspm0g110x_gcc.o
-                0x000006f8                initStub
-                0x000006f8                _init
+                0x00000474        0x4 ./startup_mspm0g110x_gcc.o
+                0x00000474                initStub
+                0x00000474                _init
+ .text.NRF_Init
+                0x00000478      0x220 ./NRFDriver.o
+                0x00000478                NRF_Init
+ .text.NRF_IRQHandler
+                0x00000698       0x14 ./NRFDriver.o
+                0x00000698                NRF_IRQHandler
+ .text.NRF_SPIHandler
+                0x000006ac       0xd0 ./NRFDriver.o
+                0x000006ac                NRF_SPIHandler
+ .text.NRF_TXPipe
+                0x0000077c      0x1fc ./NRFDriver.o
+                0x0000077c                NRF_TXPipe
+ .text.NRF_TXSetData
+                0x00000978       0xcc ./NRFDriver.o
+                0x00000978                NRF_TXSetData
+ .text.NRF_TXTransmit
+                0x00000a44       0x24 ./NRFDriver.o
+                0x00000a44                NRF_TXTransmit
  .text.DL_ADC12_setClockConfig
-                0x000006fc       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
-                0x000006fc                DL_ADC12_setClockConfig
+                0x00000a68       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+                0x00000a68                DL_ADC12_setClockConfig
  .text.DL_Common_delayCycles
-                0x0000073c        0xc C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
-                0x0000073c                DL_Common_delayCycles
+                0x00000aa8        0xc C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+                0x00000aa8                DL_Common_delayCycles
  .text.DL_SPI_init
-                0x00000748       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
-                0x00000748                DL_SPI_init
+                0x00000ab4       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+                0x00000ab4                DL_SPI_init
  .text.DL_SPI_setClockConfig
-                0x00000788       0x14 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
-                0x00000788                DL_SPI_setClockConfig
+                0x00000af4       0x14 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+                0x00000af4                DL_SPI_setClockConfig
  .text.__libc_init_array
-                0x0000079c       0x44 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
-                0x0000079c                __libc_init_array
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b08       0x44 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
+                0x00000b08                __libc_init_array
+                0x00000b50                . = ALIGN (0x8)
+ *fill*         0x00000b4c        0x4 
  *(.ctors)
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b50                . = ALIGN (0x8)
  *(.dtors)
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b50                . = ALIGN (0x8)
  *(.init)
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b50                . = ALIGN (0x8)
  *(.fini*)
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b50                . = ALIGN (0x8)
 
-.glue_7         0x000007e0        0x0
- .glue_7        0x000007e0        0x0 linker stubs
+.glue_7         0x00000b50        0x0
+ .glue_7        0x00000b50        0x0 linker stubs
 
-.glue_7t        0x000007e0        0x0
- .glue_7t       0x000007e0        0x0 linker stubs
+.glue_7t        0x00000b50        0x0
+ .glue_7t       0x00000b50        0x0 linker stubs
 
-.vfp11_veneer   0x000007e0        0x0
- .vfp11_veneer  0x000007e0        0x0 linker stubs
+.vfp11_veneer   0x00000b50        0x0
+ .vfp11_veneer  0x00000b50        0x0 linker stubs
 
-.v4_bx          0x000007e0        0x0
- .v4_bx         0x000007e0        0x0 linker stubs
+.v4_bx          0x00000b50        0x0
+ .v4_bx         0x00000b50        0x0 linker stubs
 
-.iplt           0x000007e0        0x0
- .iplt          0x000007e0        0x0 ./EMG-BatchelorsThesis.o
+.iplt           0x00000b50        0x0
+ .iplt          0x00000b50        0x0 ./EMG-BatchelorsThesis.o
 
-.ramfunc        0x20200000        0x0 load address 0x000007e0
-                0x000007e0                __ramfunct_load__ = LOADADDR (.ramfunc)
+.ramfunc        0x20200000        0x0 load address 0x00000b50
+                0x00000b50                __ramfunct_load__ = LOADADDR (.ramfunc)
                 0x20200000                __ramfunct_start__ = .
  *(.ramfunc)
                 0x20200000                . = ALIGN (0x8)
                 0x20200000                __ramfunct_end__ = .
 
-.rodata         0x000007e0       0x50
+.rodata         0x00000b50       0x50
  *(.rodata)
-                0x000007e0                . = ALIGN (0x8)
+                0x00000b50                . = ALIGN (0x8)
  *(.rodata.*)
- .rodata.NrfInitRegs
-                0x000007e0       0x20 ./EMG-BatchelorsThesis.o
- .rodata.NrfInitRegsCheck
-                0x00000800        0x9 ./EMG-BatchelorsThesis.o
- *fill*         0x00000809        0x3 
- .rodata.NrfInitRegsCheckValid
-                0x0000080c        0x9 ./EMG-BatchelorsThesis.o
- *fill*         0x00000815        0x3 
  .rodata.gADC12_0ClockConfig
-                0x00000818        0x8 ./syscfg/ti_msp_dl_config.o
+                0x00000b50        0x8 ./syscfg/ti_msp_dl_config.o
  .rodata.gSPI_NRF_clockConfig
-                0x00000820        0x2 ./syscfg/ti_msp_dl_config.o
- *fill*         0x00000822        0x2 
+                0x00000b58        0x2 ./syscfg/ti_msp_dl_config.o
+ *fill*         0x00000b5a        0x2 
  .rodata.gSPI_NRF_config
-                0x00000824        0xa ./syscfg/ti_msp_dl_config.o
-                0x00000830                . = ALIGN (0x8)
- *fill*         0x0000082e        0x2 
+                0x00000b5c        0xa ./syscfg/ti_msp_dl_config.o
+ *fill*         0x00000b66        0x2 
+ .rodata.NrfInitRegs
+                0x00000b68       0x20 ./NRFDriver.o
+ .rodata.NrfInitRegsCheck
+                0x00000b88        0x9 ./NRFDriver.o
+ *fill*         0x00000b91        0x3 
+ .rodata.NrfInitRegsCheckValid
+                0x00000b94        0x9 ./NRFDriver.o
+                0x00000ba0                . = ALIGN (0x8)
+ *fill*         0x00000b9d        0x3 
 
-.rel.dyn        0x00000830        0x0
- .rel.iplt      0x00000830        0x0 ./EMG-BatchelorsThesis.o
+.rel.dyn        0x00000ba0        0x0
+ .rel.iplt      0x00000ba0        0x0 ./EMG-BatchelorsThesis.o
 
-.preinit_array  0x00000830        0x0
-                0x00000830                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x00000ba0        0x0
+                0x00000ba0                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x00000830                PROVIDE (__preinit_array_end = .)
+                0x00000ba0                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x00000830        0x0
-                0x00000830                . = ALIGN (0x8)
-                0x00000830                PROVIDE (__init_array_start = .)
+.init_array     0x00000ba0        0x0
+                0x00000ba0                . = ALIGN (0x8)
+                0x00000ba0                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
-                0x00000830                PROVIDE (__init_array_end = .)
+                0x00000ba0                PROVIDE (__init_array_end = .)
 
-.fini_array     0x00000830        0x0
-                0x00000830                . = ALIGN (0x8)
+.fini_array     0x00000ba0        0x0
+                0x00000ba0                . = ALIGN (0x8)
                 [!provide]                PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
                 [!provide]                PROVIDE (__fini_array_end = .)
-                0x00000830                . = ALIGN (0x8)
+                0x00000ba0                . = ALIGN (0x8)
 
-.ARM.exidx      0x00000830        0x0
-                0x00000830                __exidx_start = .
+.ARM.exidx      0x00000ba0        0x0
+                0x00000ba0                __exidx_start = .
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x00000830                __exidx_end = .
+                0x00000ba0                __exidx_end = .
 
-.ARM.extab      0x00000830        0x0
-                0x00000830                . = ALIGN (0x8)
+.ARM.extab      0x00000ba0        0x0
+                0x00000ba0                . = ALIGN (0x8)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x00000830                . = ALIGN (0x8)
-                0x00000830                __etext = .
+                0x00000ba0                . = ALIGN (0x8)
+                0x00000ba0                __etext = .
 
-.data           0x20200000        0x0 load address 0x00000830
-                0x00000830                __data_load__ = LOADADDR (.data)
+.data           0x20200000       0x10 load address 0x00000ba0
+                0x00000ba0                __data_load__ = LOADADDR (.data)
                 0x20200000                __data_start__ = .
  *(.data)
  .data          0x20200000        0x0 ./EMG-BatchelorsThesis.o
  .data          0x20200000        0x0 ./syscfg/ti_msp_dl_config.o
  .data          0x20200000        0x0 ./startup_mspm0g110x_gcc.o
+ .data          0x20200000        0x0 ./NRFDriver.o
  .data          0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
  .data          0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
  .data          0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
  .data          0x20200000        0x0 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
  *(.data*)
-                0x20200000                . = ALIGN (0x8)
-                0x20200000                __data_end__ = .
+ .data.tmp_data_
+                0x20200000        0x5 ./EMG-BatchelorsThesis.o
+                0x20200000                tmp_data_
+ *fill*         0x20200005        0x3 
+ .data.failedReg
+                0x20200008        0x4 ./NRFDriver.o
+                0x20200008                failedReg
+ .data.regsCorrect
+                0x2020000c        0x1 ./NRFDriver.o
+                0x2020000c                regsCorrect
+                0x20200010                . = ALIGN (0x8)
+ *fill*         0x2020000d        0x3 
+                0x20200010                __data_end__ = .
 
-.igot.plt       0x20200000        0x0 load address 0x00000830
- .igot.plt      0x20200000        0x0 ./EMG-BatchelorsThesis.o
+.igot.plt       0x20200010        0x0 load address 0x00000bb0
+ .igot.plt      0x20200010        0x0 ./EMG-BatchelorsThesis.o
 
-.bss            0x20200000       0x40
-                0x20200000                __bss_start__ = .
+.bss            0x20200010       0xb8
+                0x20200010                __bss_start__ = .
  *(.shbss)
  *(.bss)
- .bss           0x20200000        0x0 ./EMG-BatchelorsThesis.o
- .bss           0x20200000        0x0 ./syscfg/ti_msp_dl_config.o
- .bss           0x20200000        0x0 ./startup_mspm0g110x_gcc.o
- .bss           0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .bss           0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .bss           0x20200000        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
- .bss           0x20200000        0x0 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
+ .bss           0x20200010        0x0 ./EMG-BatchelorsThesis.o
+ .bss           0x20200010        0x0 ./syscfg/ti_msp_dl_config.o
+ .bss           0x20200010        0x0 ./startup_mspm0g110x_gcc.o
+ .bss           0x20200010        0x0 ./NRFDriver.o
+ .bss           0x20200010        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .bss           0x20200010        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .bss           0x20200010        0x0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+ .bss           0x20200010        0x0 C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
  *(.bss.*)
- .bss.GotBack   0x20200000       0x14 ./EMG-BatchelorsThesis.o
-                0x20200000                GotBack
- .bss.cnt       0x20200014        0x4 ./EMG-BatchelorsThesis.o
-                0x20200014                cnt
+ .bss.cnt       0x20200010        0x4 ./EMG-BatchelorsThesis.o
+                0x20200010                cnt
+ .bss.got_back_
+                0x20200014       0x80 ./NRFDriver.o
+                0x20200014                got_back_
+ .bss.got_back_len_
+                0x20200094        0x4 ./NRFDriver.o
+                0x20200094                got_back_len_
+ .bss.receive_pos.6155
+                0x20200098        0x4 ./NRFDriver.o
  *(COMMON)
- COMMON         0x20200018       0x28 ./syscfg/ti_msp_dl_config.o
-                0x20200018                gSPI_NRFBackup
-                0x20200040                . = ALIGN (0x8)
-                0x20200040                __bss_end__ = .
+ COMMON         0x2020009c       0x28 ./syscfg/ti_msp_dl_config.o
+                0x2020009c                gSPI_NRFBackup
+                0x202000c8                . = ALIGN (0x8)
+ *fill*         0x202000c4        0x4 
+                0x202000c8                __bss_end__ = .
 
-.noinit         0x20200040        0x0
+.noinit         0x202000c8        0x0
  *(*.noinit*)
-                0x20200040                . = ALIGN (0x8)
+                0x202000c8                . = ALIGN (0x8)
 
-.heap           0x20200040        0x0
-                0x20200040                __heap_start__ = .
-                0x20200040                end = __heap_start__
-                0x20200040                _end = end
-                0x20200040                __end = end
+.heap           0x202000c8        0x0
+                0x202000c8                __heap_start__ = .
+                0x202000c8                end = __heap_start__
+                0x202000c8                _end = end
+                0x202000c8                __end = end
  *(.heap)
-                0x20200040                __heap_end__ = .
-                0x20200040                __HeapLimit = __heap_end__
+                0x202000c8                __heap_end__ = .
+                0x202000c8                __HeapLimit = __heap_end__
 
-.stack          0x20200040        0x0
-                0x20200040                _stack = .
+.stack          0x202000c8        0x0
+                0x202000c8                _stack = .
  *(.stack)
 
 .BCRConfig
@@ -347,71 +398,72 @@ LOAD C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a
 END GROUP
 OUTPUT(EMG-BatchelorsThesis.out elf32-littlearm)
 
-.debug_info     0x00000000    0x1c83b
- .debug_info    0x00000000     0x4c31 ./EMG-BatchelorsThesis.o
- .debug_info    0x00004c31     0x5d58 ./syscfg/ti_msp_dl_config.o
- .debug_info    0x0000a989      0x1bc ./startup_mspm0g110x_gcc.o
- .debug_info    0x0000ab45     0x610b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_info    0x00010c50     0x55ff C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_info    0x0001624f     0x65ec C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+.debug_info     0x00000000    0x20a4b
+ .debug_info    0x00000000     0x4ac8 ./EMG-BatchelorsThesis.o
+ .debug_info    0x00004ac8     0x5d58 ./syscfg/ti_msp_dl_config.o
+ .debug_info    0x0000a820      0x1bc ./startup_mspm0g110x_gcc.o
+ .debug_info    0x0000a9dc     0x4379 ./NRFDriver.o
+ .debug_info    0x0000ed55     0x610b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_info    0x00014e60     0x55ff C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_info    0x0001a45f     0x65ec C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
 
-.debug_abbrev   0x00000000      0xf76
- .debug_abbrev  0x00000000      0x303 ./EMG-BatchelorsThesis.o
- .debug_abbrev  0x00000303      0x398 ./syscfg/ti_msp_dl_config.o
- .debug_abbrev  0x0000069b       0xe7 ./startup_mspm0g110x_gcc.o
- .debug_abbrev  0x00000782      0x2ef C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_abbrev  0x00000a71      0x166 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_abbrev  0x00000bd7      0x39f C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+.debug_abbrev   0x00000000     0x11b2
+ .debug_abbrev  0x00000000      0x294 ./EMG-BatchelorsThesis.o
+ .debug_abbrev  0x00000294      0x398 ./syscfg/ti_msp_dl_config.o
+ .debug_abbrev  0x0000062c       0xe7 ./startup_mspm0g110x_gcc.o
+ .debug_abbrev  0x00000713      0x2ab ./NRFDriver.o
+ .debug_abbrev  0x000009be      0x2ef C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_abbrev  0x00000cad      0x166 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_abbrev  0x00000e13      0x39f C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
 
-.debug_loc      0x00000000      0x990
- .debug_loc     0x00000000       0x39 ./EMG-BatchelorsThesis.o
- .debug_loc     0x00000039       0x26 ./syscfg/ti_msp_dl_config.o
- .debug_loc     0x0000005f       0x13 ./startup_mspm0g110x_gcc.o
- .debug_loc     0x00000072      0x134 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_loc     0x000001a6      0x7ea C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+.debug_aranges  0x00000000      0x248
+ .debug_aranges
+                0x00000000       0x30 ./EMG-BatchelorsThesis.o
+ .debug_aranges
+                0x00000030       0x58 ./syscfg/ti_msp_dl_config.o
+ .debug_aranges
+                0x00000088       0x30 ./startup_mspm0g110x_gcc.o
+ .debug_aranges
+                0x000000b8       0x78 ./NRFDriver.o
+ .debug_aranges
+                0x00000130       0x28 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_aranges
+                0x00000158       0x20 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_aranges
+                0x00000178       0xd0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
 
-.debug_aranges  0x00000000      0x1d8
- .debug_aranges
-                0x00000000       0x38 ./EMG-BatchelorsThesis.o
- .debug_aranges
-                0x00000038       0x58 ./syscfg/ti_msp_dl_config.o
- .debug_aranges
-                0x00000090       0x30 ./startup_mspm0g110x_gcc.o
- .debug_aranges
-                0x000000c0       0x28 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_aranges
-                0x000000e8       0x20 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_aranges
-                0x00000108       0xd0 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+.debug_ranges   0x00000000      0x8b8
+ .debug_ranges  0x00000000       0x20 ./EMG-BatchelorsThesis.o
+ .debug_ranges  0x00000020      0x220 ./syscfg/ti_msp_dl_config.o
+ .debug_ranges  0x00000240       0x20 ./startup_mspm0g110x_gcc.o
+ .debug_ranges  0x00000260      0x170 ./NRFDriver.o
+ .debug_ranges  0x000003d0       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_ranges  0x00000410       0x10 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_ranges  0x00000420      0x498 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
 
-.debug_ranges   0x00000000      0x7d0
- .debug_ranges  0x00000000       0xd8 ./EMG-BatchelorsThesis.o
- .debug_ranges  0x000000d8      0x1f0 ./syscfg/ti_msp_dl_config.o
- .debug_ranges  0x000002c8       0x20 ./startup_mspm0g110x_gcc.o
- .debug_ranges  0x000002e8       0x40 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_ranges  0x00000328       0x10 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_ranges  0x00000338      0x498 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+.debug_line     0x00000000     0x32f8
+ .debug_line    0x00000000      0x52e ./EMG-BatchelorsThesis.o
+ .debug_line    0x0000052e      0x927 ./syscfg/ti_msp_dl_config.o
+ .debug_line    0x00000e55      0x1cb ./startup_mspm0g110x_gcc.o
+ .debug_line    0x00001020      0x8f0 ./NRFDriver.o
+ .debug_line    0x00001910      0x5d5 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_line    0x00001ee5      0x425 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_line    0x0000230a      0xfee C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
 
-.debug_line     0x00000000     0x2cc0
- .debug_line    0x00000000      0x7f2 ./EMG-BatchelorsThesis.o
- .debug_line    0x000007f2      0x91b ./syscfg/ti_msp_dl_config.o
- .debug_line    0x0000110d      0x1cb ./startup_mspm0g110x_gcc.o
- .debug_line    0x000012d8      0x5d5 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_line    0x000018ad      0x425 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_line    0x00001cd2      0xfee C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
-
-.debug_str      0x00000000     0x4395
- .debug_str     0x00000000     0x1b7f ./EMG-BatchelorsThesis.o
-                               0x1c8d (size before relaxing)
- .debug_str     0x00001b7f     0x1924 ./syscfg/ti_msp_dl_config.o
+.debug_str      0x00000000     0x45a7
+ .debug_str     0x00000000     0x1b1f ./EMG-BatchelorsThesis.o
+                               0x1c2d (size before relaxing)
+ .debug_str     0x00001b1f     0x1924 ./syscfg/ti_msp_dl_config.o
                                0x309b (size before relaxing)
- .debug_str     0x000034a3      0x13d ./startup_mspm0g110x_gcc.o
+ .debug_str     0x00003443      0x13d ./startup_mspm0g110x_gcc.o
                                 0x2f4 (size before relaxing)
- .debug_str     0x000035e0      0x920 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_str     0x00003580      0x272 ./NRFDriver.o
+                               0x15de (size before relaxing)
+ .debug_str     0x000037f2      0x920 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
                                0x21dc (size before relaxing)
- .debug_str     0x00003f00       0xd4 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_str     0x00004112       0xd4 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
                                0x1b27 (size before relaxing)
- .debug_str     0x00003fd4      0x3c1 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+ .debug_str     0x000041e6      0x3c1 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
                                0x2451 (size before relaxing)
 
 .comment        0x00000000       0x79
@@ -419,6 +471,7 @@ OUTPUT(EMG-BatchelorsThesis.out elf32-littlearm)
                                  0x7a (size before relaxing)
  .comment       0x00000079       0x7a ./syscfg/ti_msp_dl_config.o
  .comment       0x00000079       0x7a ./startup_mspm0g110x_gcc.o
+ .comment       0x00000079       0x7a ./NRFDriver.o
  .comment       0x00000079       0x7a C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
  .comment       0x00000079       0x7a C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
  .comment       0x00000079       0x7a C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
@@ -432,19 +485,29 @@ OUTPUT(EMG-BatchelorsThesis.out elf32-littlearm)
  .ARM.attributes
                 0x00000056       0x2b ./startup_mspm0g110x_gcc.o
  .ARM.attributes
-                0x00000081       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+                0x00000081       0x2b ./NRFDriver.o
  .ARM.attributes
-                0x000000ac       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+                0x000000ac       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
  .ARM.attributes
-                0x000000d7       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+                0x000000d7       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
  .ARM.attributes
-                0x00000102       0x2c C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
+                0x00000102       0x2b C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+ .ARM.attributes
+                0x0000012d       0x2c C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
 
-.debug_frame    0x00000000      0x450
- .debug_frame   0x00000000       0x98 ./EMG-BatchelorsThesis.o
- .debug_frame   0x00000098       0xc0 ./syscfg/ti_msp_dl_config.o
- .debug_frame   0x00000158       0x48 ./startup_mspm0g110x_gcc.o
- .debug_frame   0x000001a0       0x44 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
- .debug_frame   0x000001e4       0x20 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
- .debug_frame   0x00000204      0x220 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
- .debug_frame   0x00000424       0x2c C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
+.debug_frame    0x00000000      0x56c
+ .debug_frame   0x00000000       0x68 ./EMG-BatchelorsThesis.o
+ .debug_frame   0x00000068       0xc0 ./syscfg/ti_msp_dl_config.o
+ .debug_frame   0x00000128       0x48 ./startup_mspm0g110x_gcc.o
+ .debug_frame   0x00000170      0x14c ./NRFDriver.o
+ .debug_frame   0x000002bc       0x44 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_frame   0x00000300       0x20 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_common.o)
+ .debug_frame   0x00000320      0x220 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)
+ .debug_frame   0x00000540       0x2c C:/ti/gcc_arm_none_eabi_9_2_1/arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-init.o)
+
+.debug_loc      0x00000000      0x9c6
+ .debug_loc     0x00000000       0x26 ./syscfg/ti_msp_dl_config.o
+ .debug_loc     0x00000026       0x13 ./startup_mspm0g110x_gcc.o
+ .debug_loc     0x00000039       0x6f ./NRFDriver.o
+ .debug_loc     0x000000a8      0x134 C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_adc12.o)
+ .debug_loc     0x000001dc      0x7ea C:/ti/mspm0_sdk_2_04_00_06/source\ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x/driverlib.a(dl_spi.o)

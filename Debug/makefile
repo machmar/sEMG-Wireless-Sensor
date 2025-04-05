@@ -13,6 +13,7 @@ ORDERED_OBJS += \
 "./EMG-BatchelorsThesis.o" \
 "./syscfg/ti_msp_dl_config.o" \
 "./startup_mspm0g110x_gcc.o" \
+"./NRFDriver.o" \
 $(GEN_CMDS__FLAG) \
 -l:device.lds.genlibs \
 -lgcc \
@@ -146,8 +147,8 @@ EMG-BatchelorsThesis.out: $(OBJS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EMG-BatchelorsThesis.o" "syscfg\ti_msp_dl_config.o" "startup_mspm0g110x_gcc.o" 
-	-$(RM) "EMG-BatchelorsThesis.d" "syscfg\ti_msp_dl_config.d" "startup_mspm0g110x_gcc.d" 
+	-$(RM) "EMG-BatchelorsThesis.o" "syscfg\ti_msp_dl_config.o" "startup_mspm0g110x_gcc.o" "NRFDriver.o" 
+	-$(RM) "EMG-BatchelorsThesis.d" "syscfg\ti_msp_dl_config.d" "startup_mspm0g110x_gcc.d" "NRFDriver.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
 	-@echo ' '

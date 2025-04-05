@@ -11,7 +11,8 @@ SYSCFG_SRCS += \
 C_SRCS += \
 ../EMG-BatchelorsThesis.c \
 ./syscfg/ti_msp_dl_config.c \
-C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g110x_gcc.c 
+C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g110x_gcc.c \
+../NRFDriver.c 
 
 GEN_CMDS += \
 ./syscfg/device_linker.lds 
@@ -27,7 +28,8 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EMG-BatchelorsThesis.d \
 ./syscfg/ti_msp_dl_config.d \
-./startup_mspm0g110x_gcc.d 
+./startup_mspm0g110x_gcc.d \
+./NRFDriver.d 
 
 GEN_OPTS += \
 ./syscfg/device.opt 
@@ -35,7 +37,8 @@ GEN_OPTS += \
 OBJS += \
 ./EMG-BatchelorsThesis.o \
 ./syscfg/ti_msp_dl_config.o \
-./startup_mspm0g110x_gcc.o 
+./startup_mspm0g110x_gcc.o \
+./NRFDriver.o 
 
 GEN_MISC_FILES += \
 ./syscfg/device.lds.genlibs \
@@ -48,7 +51,8 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EMG-BatchelorsThesis.o" \
 "syscfg\ti_msp_dl_config.o" \
-"startup_mspm0g110x_gcc.o" 
+"startup_mspm0g110x_gcc.o" \
+"NRFDriver.o" 
 
 GEN_MISC_FILES__QUOTED += \
 "syscfg\device.lds.genlibs" \
@@ -58,7 +62,8 @@ GEN_MISC_FILES__QUOTED += \
 C_DEPS__QUOTED += \
 "EMG-BatchelorsThesis.d" \
 "syscfg\ti_msp_dl_config.d" \
-"startup_mspm0g110x_gcc.d" 
+"startup_mspm0g110x_gcc.d" \
+"NRFDriver.d" 
 
 GEN_FILES__QUOTED += \
 "syscfg\device_linker.lds" \
@@ -68,7 +73,8 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EMG-BatchelorsThesis.c" \
 "./syscfg/ti_msp_dl_config.c" \
-"C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g110x_gcc.c" 
+"C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g110x_gcc.c" \
+"../NRFDriver.c" 
 
 SYSCFG_SRCS__QUOTED += \
 "../EMG-BatchelorsThesis.syscfg" 
