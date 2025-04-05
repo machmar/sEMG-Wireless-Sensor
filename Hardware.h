@@ -1,0 +1,23 @@
+#ifndef HARDWARE_H_
+#define HARDWARE_H_
+
+#include "ti/devices/msp/m0p/mspm0g110x.h"
+
+#define HW_AMP_EN_SET (GPIOA->DOUTSET31_0 = 1 << 23)
+#define HW_AMP_EN_CLR (GPIOA->DOUTCLR31_0 = 1 << 23)
+#define HW_AMP_LEAD (GPIOA->DIN31_0 & 1 << 24)
+#define HW_LED_RED_SET (GPIOA->DOUTSET31_0 = 1 << 0)
+#define HW_LED_RED_CLR (GPIOA->DOUTCLR31_0 = 1 << 0)
+#define HW_LED_RED_TGL (GPIOA->DOUTTGL31_0 = 1 << 0)
+#define HW_LED_YEL_SET (GPIOA->DOUTSET31_0 = 1 << 1)
+#define HW_LED_YEL_CLR (GPIOA->DOUTCLR31_0 = 1 << 1)
+#define HW_LED_YEL_TGL (GPIOA->DOUTTGL31_0 = 1 << 1)
+#define HW_ADC_BAT (ADC0->ULLMEM.MEMRES[0])
+#define HW_ADC_REF (ADC0->ULLMEM.MEMRES[2])
+#define HW_ADC_EMG (ADC0->ULLMEM.MEMRES[1])
+#define HW_NRF_CS_SET (GPIOA->DOUTSET31_0 = 1 << 4)
+#define HW_NRF_CS_CLR (GPIOA->DOUTCLR31_0 = 1 << 4)
+#define HW_NRF_CE_SET (GPIOA->DOUTSET31_0 = 1 << 3)
+#define HW_NRF_CE_CLR (GPIOA->DOUTCLR31_0 = 1 << 3)
+
+#endif
