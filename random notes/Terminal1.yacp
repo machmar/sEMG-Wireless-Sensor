@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SettingsName>YAT Command Page Definition</SettingsName>
+  <SettingsVersion>1.0.2</SettingsVersion>
+  <ProductVersion>2.7.2</ProductVersion>
+  <Warning>Modifying structure and/or content may cause undefined behavior!</Warning>
+  <Mark>
+    <TimeStamp>2025-03-16T18:06:26.9594959+01:00</TimeStamp>
+    <UserName>marec</UserName>
+  </Mark>
+  <Page>
+    <PageName>Page 1</PageName>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>Help</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-H</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>Reset</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-R</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>CS down</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>CS up</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>CE High</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-E</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>CE Low</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-F</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>false</IsDefined>
+      <Description />
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines />
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>false</IsDefined>
+      <Description />
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines />
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>Init</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(200C)-U-D\h(2455)-U-D\h(3D04)-U-D\h(3C3F)-U-D\h(277E)-U-D\h(207C)-U-D\h(277E)-U-D\h(E1)-U-D\h(E2)-U-D\h(207E)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>init check</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(0000)-U-D\h(0400)-U-D\h(1D00)-U-D\h(1C00)-U-D\h(0700)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>Additional init</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(270E)-U-D\h(207E)-U-D\h(2502)-U-D\h(260F)-U-D\h(2303)-U-D\h(213F)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>additional check</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(0700)-U-D\h(0000)-U-D\h(0500)-U-D\h(0600)-U-D\h(0300)-U-D\h(0100)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>prep receive</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(270E)-U-D\h(207E)-U-D\h(2A0123456789)-U-D\h(2201)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>start receive</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(270E)-U-D\h(207E)-U-D\h(277E)-U-D\h(203F)-U-D\h(E2)-U-E</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>end receive</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-F-D\h(270E)-U-D\h(207E)-U-D\h(6000)-U-D\h(6100000000)-U-D\h(277E)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>false</IsDefined>
+      <Description />
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines />
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>prep transmit</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(270E)-U-D\h(207E)-U-D\h(277E)-U-D\h(300123456789)-U-D\h(2A0123456789)-U-D\h(2201)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>start transmit</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(270E)-U-D\h(207E)-U-D\h(277E)-U-D\h(205E)-U-D\h(E1)-U-D\h(A001020304)-U-E-F</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>check acks</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(FF)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+    <Commands>
+      <IsDefined>true</IsDefined>
+      <Description>end transmit</Description>
+      <DefaultRadix>String</DefaultRadix>
+      <CommandLines>-D\h(277E)-U-D\h(207E)-U</CommandLines>
+      <IsFilePath>false</IsFilePath>
+      <FilePath />
+    </Commands>
+  </Page>
+</Settings>

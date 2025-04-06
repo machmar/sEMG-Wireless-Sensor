@@ -1,0 +1,31 @@
+nrf interface:
+Set send pipe address, set send data, send, read acks
+Set get pipe address, select pipe to listen to, irq read data
+
+protocol:
+pipe 0 as fallback, otherwise always pipe 1
+sensor always sends sEMG data, the first byte is the type, this is present for all transmists
+PC part communicates by transmitting on the same pipe right after sending acks, again the first byte is the type, always
+after sending data and getting acks, the device must wait at least as long as it took to send and receive acks to receive any commands.
+
+types:
+0x00: sEMG data, measured at 1kHz, when ack is not received, immeadiately store the transmited packet, and any subsequent, transmit on loop until you get a reply
+0x01: battery level, responds in percentage
+0x02: flash LED
+0x03: lead status
+0x04: new pipe request, if the accept is not received on the new pipe, fallback
+0x05: new pipe accept (the device must store and verify the storage of new pipe before sending this)
+0xfd: alive check
+0xfe: go to permanent sleep
+0xff: extended type, next byte is the type byte
+
+pipes:
+fallback  0x1122112233
+pipe one  0x1122112201
+pipe five 0x1122112205
+
+if no acks are received for 30 seconds, go to fallback sending new pipe request with already set pipe
+
+LEDs:
+PC side: flash on serial receive, or data receive
+sensor: orange solid on electrode removal, orange blink each n samples sent and acked, flash red on no ack in 30s, on flash LED blink both once
