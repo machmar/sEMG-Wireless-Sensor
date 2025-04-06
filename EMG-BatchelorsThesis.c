@@ -37,9 +37,14 @@
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 #include "Hardware.h"
 #include "NRFDriver.h"
+#include <string.h>
 
-uint32_t cnt = 0;
-uint8_t tmp_data_[5] = "ahoj";
+/* !!!BIG BIG ISSUE!!!
+ * Setting a value to a global variable does not guarantee it having that value during execution for some reason!
+*/
+
+uint32_t cnt;
+uint8_t tmp_data_[5];
 
 int main(void)
 {
@@ -60,12 +65,14 @@ int main(void)
         }
     }
 
-    if (!NRF_TXPipe(0x0123456789)) {
+    if (!NRF_TXPipe(0x0123456788)) {
         while(1) { // nrf init gone bad, stop dead
             HW_LED_RED_TGL;
             for (uint32_t i = 0; i < 200000; i++);
         }
     }
+
+    memcpy(tmp_data_, (uint8_t []){1, 2, 3, 4}, 4);
 
     while (1) {
         
@@ -77,7 +84,7 @@ int main(void)
         }
 
         if (!cnt++) {
-            NRF_TXSetData(tmp_data_, 2);
+            NRF_TXSetData(tmp_data_, 4);
             NRF_TXTransmit();
         }
         if (cnt >= UINT16_MAX * 30) cnt = 0;

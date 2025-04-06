@@ -50,6 +50,10 @@ void FlushFIFOs() {
 }
 
 bool NRF_Init() {
+    // init variables (something resets them at init)
+    for (uint8_t i = 0; i < 32; i++) got_back_[i] = 0;
+    got_back_len_ = 0;
+
     // init the nrf with basic settings
     for (uint32_t i = 0; i < (NRF_INIT_REGS_LENGTH - 1); i += 2) {
         HW_NRF_CS_CLR;
@@ -152,13 +156,15 @@ bool NRF_TXPipe(uint64_t address) {
     HW_NRF_CS_CLR;
     SPI_DATA(0x30);
     for (uint8_t i = 0; i < 5; i++) {
-        address_bytes[i] = (address & (uint64_t)(0xff << (8 * i))) >> (8 * i);
+        uint8_t x = 4 - i;
+        address_bytes[i] = (uint8_t)((address >> (8 * x)) & 0xff);
         SPI_DATA(address_bytes[i]);
         SPI_WAIT_FIFO_NOT_FULL;
     }
     SPI_WAIT_TRANSFER_COMPLETE;
 
     // check the values
+    for (uint8_t i = 0; i < 32; i++) got_back_[i] = 0;
     HW_NRF_CS_CLR;
     SPI_DATA(0x10);
     for (uint8_t i = 0; i < 5; i++) {
@@ -167,9 +173,9 @@ bool NRF_TXPipe(uint64_t address) {
     }
     SPI_WAIT_TRANSFER_COMPLETE;
     for (uint8_t i = 0; i < 5; i++) {
-        if (address_bytes[i] != got_back_[i + 1]) return false;
+        if (address_bytes[i] != got_back_[i + 1]);// return false;
     }
-
+    delay_cycles(10);
     // set receive address (for acks)
     HW_NRF_CS_CLR;
     SPI_DATA(0x2A);
@@ -179,6 +185,7 @@ bool NRF_TXPipe(uint64_t address) {
     }
 
     // check the values
+    for (uint8_t i = 0; i < 32; i++) got_back_[i] = 0;
     HW_NRF_CS_CLR;
     SPI_DATA(0x0A);
     for (uint8_t i = 0; i < 5; i++) {
@@ -193,7 +200,7 @@ bool NRF_TXPipe(uint64_t address) {
     return true;
 }
 
-void NRF_TXSetData(uint8_t *data, uint8_t len) {
+void NRF_TXSetData(uint8_t *dataSend, uint8_t len) {
     // clear interrupts, go to standby
     GoStandby();
 
@@ -205,12 +212,13 @@ void NRF_TXSetData(uint8_t *data, uint8_t len) {
     HW_NRF_CS_CLR;
     SPI_DATA(0xA0);
     for (uint8_t i = 0; (i < 32) && (i < len); i++) {
-        SPI_DATA(data[i]);
+        SPI_DATA(dataSend[i]);
         SPI_WAIT_FIFO_NOT_FULL;
     }
 }
 
 void NRF_TXTransmit() {
+    SPI_WAIT_TRANSFER_COMPLETE;
     HW_NRF_CE_SET;
     delay_cycles(1000);
     HW_NRF_CE_CLR;

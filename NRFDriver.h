@@ -18,7 +18,7 @@ void NRF_SPIHandler();
 
 bool NRF_TXPipe(uint64_t address);
 
-void NRF_TXSetData(uint8_t *data, uint8_t len);
+void NRF_TXSetData(uint8_t *dataSend, uint8_t len);
 
 void NRF_TXTransmit();
 
