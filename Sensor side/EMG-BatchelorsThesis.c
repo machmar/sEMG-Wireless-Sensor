@@ -65,14 +65,15 @@ int main(void)
         }
     }
 
-    if (!NRF_TXPipe(0x0123456788)) {
+    /*if (!NRF_TXPipe(0x0123456788)) { //receiving is broken
         while(1) { // nrf init gone bad, stop dead
             HW_LED_RED_TGL;
             for (uint32_t i = 0; i < 200000; i++);
         }
-    }
+    }*/
 
-    memcpy(tmp_data_, (uint8_t []){1, 2, 3, 4}, 4);
+    //memcpy(tmp_data_, (uint8_t []){1, 2, 3, 4}, 4);
+    memcpy(tmp_data_, "Ahoj, Svete!", 13);
 
     while (1) {
         
@@ -84,7 +85,7 @@ int main(void)
         }
 
         if (!cnt++) {
-            NRF_TXSetData(tmp_data_, 4);
+            NRF_TXSetData(tmp_data_, 13);
             NRF_TXTransmit();
         }
         if (cnt >= UINT16_MAX * 30) cnt = 0;
