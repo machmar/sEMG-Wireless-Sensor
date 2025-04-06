@@ -44,7 +44,7 @@
 */
 
 uint32_t cnt;
-uint8_t tmp_data_[5];
+uint8_t tmp_data_[32];
 
 int main(void)
 {
