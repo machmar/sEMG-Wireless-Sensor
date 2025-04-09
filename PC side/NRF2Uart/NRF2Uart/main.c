@@ -8,7 +8,7 @@
 #include <avr/io.h>
 #include <avr/cpufunc.h>
 #include <avr/interrupt.h>
-#include "avr/delay.h"
+#include "util/delay.h"
 
 #define SERIAL_SEND USART0.CTRLA = 0b10100000
 #define SPI_SEND(x) while(sendWait); SPI0.DATA = (x); sendWait = 1
@@ -17,17 +17,16 @@
 #define CE_LOW PORTA.OUTCLR = 1 << 4
 #define CE_HIGH PORTA.OUTSET = 1 << 4
 #define SPI_SEND_REG(x, y) CS_LOW; SPI_SEND(x); SPI_SEND(y); CS_HIGH
-#define NRF_CLEAR_AND_IDLE SPI_SEND_REG(0x27, 0x0E); SPI_SEND_REG(0x20, 0x7E)
+#define NRF_CLEAR_AND_IDLE SPI_SEND_REG(0x27, 0x7E); SPI_SEND_REG(0x20, 0x7E)
 
 char replyBuf[35] = "Ahhoj haha\n\n\n";
-char receiveChar = 0;
-uint8_t volatile systemCommand = 0;
-_Bool dataToWrite = 0;
-uint8_t data = 0;
+char sendData[35] = {0};
 _Bool volatile sendWait = 0;
 uint8_t volatile gotBack = 0;
 uint8_t volatile flashEvent = 0;
 _Bool volatile dealWithInterrupt = 0;
+uint8_t volatile dealWithTransmission = 0;
+uint8_t volatile receivingTransmitData = 0;
 
 typedef enum {
 	State_Idle,
@@ -131,9 +130,8 @@ int main(void)
 		switch (NRFState) {
 		case State_Idle:
 			NRF_CLEAR_AND_IDLE;
-			SPI_SEND_REG(0x27, 0x7E); // all of this is mot likely redundant to do after each tranmission but I don't care atm
-			SPI_SEND_REG(0x20, 0x3F);
-			SPI_SEND_REG(0xE2, 0x00);
+			SPI_SEND_REG(0x20, 0x3F); // enable receive interrupt
+			SPI_SEND_REG(0xE2, 0x00); // 
 			CE_HIGH; // enable reception amp
 			NRFState = State_ReceiveWait;
 			break;
@@ -160,7 +158,12 @@ int main(void)
 			replyBuf[dataWidth] = '\n';
 			replyBuf[dataWidth + 1] = 0;
 			SERIAL_SEND;
+			
 			SPI_SEND_REG(0x27, 0x7E);
+			
+			if (dealWithTransmission != 0) {
+				
+			}
 			NRFState = State_Idle;
 			break;
 		
@@ -185,15 +188,51 @@ ISR(USART0_DRE_vect) {	//new data can be sent
 }
 
 ISR(USART0_RXC_vect) {
-	uint8_t tmp = USART0.RXDATAL;
-	flashEvent++;
+	uint8_t received = USART0.RXDATAL;
+	static uint8_t numBytesExpected = 0;
 	
-	if (tmp == 'R') {
-		ccp_write_io((void *) & (RSTCTRL.SWRR), 1);
+	if (receivingTransmitData == 0)
+	{
+		switch (received) {
+		case 'R': // reset
+			ccp_write_io((void *) & (RSTCTRL.SWRR), 1);
+			break;
+			
+		case 'U': // resend last received data
+			SERIAL_SEND;
+			break;
+			
+		case 'T'; // transmit data to sensor
+			receivingTransmitData = 1;
+			numBytesExpected = 0;
+			break;	
+		}
 	}
-	else if (tmp == 'U') {
-		SERIAL_SEND;
+	else {
+		if (receivingTransmitData == 1) {
+			if (received > 32) {
+				strcpy(replyBuf, "Error: max length 32");
+				receivingTransmitData = 0;
+				SERIAL_SEND;
+			}
+			else {
+				numBytesExpected = received;
+				receivingTransmitData = 2
+			}
+		}
+		else {
+			if (receivingTransmitData < (numBytesExpected + 2)) {
+				dealWithTransmission[receivingTransmitData - 2] = received;
+				receivingTransmitData++;
+			}
+			else {
+				dealWithTransmission = receivingTransmitData - 2;
+				receivingTransmitData = 0;
+			}
+		}
 	}
+
+	flashEvent++;
 }
 
 ISR(SPI0_INT_vect) {
