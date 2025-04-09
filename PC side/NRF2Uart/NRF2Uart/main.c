@@ -45,7 +45,7 @@ int main(void)
     ccp_write_io((void *) & (CLKCTRL.OSC20MCTRLA), 0b10);
     while(CLKCTRL.MCLKSTATUS & 1);
 	
-	SPI0.CTRLA = SPI_MASTER_bm | SPI_ENABLE_bm | 0b110; // MSB, Master, div by 128
+	SPI0.CTRLA = SPI_MASTER_bm | SPI_ENABLE_bm | 0b000; // MSB, Master, div by 4
 	SPI0.CTRLB = SPI_SSD_bm; // SS disabled, Mode 0
 	SPI0.INTCTRL = SPI_IE_bm; // interrupt on Transfer Complete
 	PORTA.DIRSET = (1 << 1) | (1 << 3) | (1 << 4); // enable MISO, SCK, CE pins
@@ -56,7 +56,7 @@ int main(void)
 	USART0.CTRLA = 0b10100000;	// receive and empty buffer interrupts
 	USART0.CTRLB = 0b11000000;
 	USART0.CTRLC = USART_CHSIZE_8BIT_gc;
-	USART0.BAUD = 8333; // not ideal as there are infinite threes but hopefully this is good enough
+	USART0.BAUD = 80; // baudrate of one million (beers)
 	
 	PORTA.PIN5CTRL = (1 << 3) | 0x3; // enabled pullup, interrupt on falling edge
 	PORTB.DIRSET = 1 << 1; // enable LED output
@@ -191,11 +191,13 @@ ISR(USART0_RXC_vect) {
 	if (tmp == 'R') {
 		ccp_write_io((void *) & (RSTCTRL.SWRR), 1);
 	}
+	else if (tmp == 'U') {
+		SERIAL_SEND;
+	}
 }
 
 ISR(SPI0_INT_vect) {
 	gotBack = SPI0.DATA;
-	USART0.TXDATAL = gotBack;
 	
 	sendWait = 0;
 	SPI0.INTFLAGS = 0x80; // clear flags
