@@ -29,6 +29,7 @@ void inline AddFlashEvent();
 millis_t broadcastPMill = 0;
 
 char replyBuf[50] = "Ahhoj haha\n\n\n";
+uint8_t replyBufManualLength = 0;
 char sendData[35] = {0};
 _Bool volatile sendWait = 0;
 uint8_t volatile gotBack = 0;
@@ -217,6 +218,7 @@ int main(void)
 			}
 			replyBuf[dataWidth - 1] = '\n';	// !!!THIS IS TEMPORARY AND BAD, IT DELETES LAST BYTE OF TRANSMISSION, ONLY FOR TESTING, REMOVE!!!
 			replyBuf[dataWidth] = 0;
+			replyBufManualLength = dataWidth;
 			SERIAL_SEND;
 			
 			SPI_SEND_REG(0x27, 0x7E);
@@ -290,13 +292,22 @@ int main(void)
 
 ISR(USART0_DRE_vect) {	//new data can be sent
 	static uint8_t bufPos = 0;
+	static _Bool ignoreStringStyleEnd = 0;
 	
-	if (replyBuf[bufPos]) {
+	if ((replyBuf[bufPos] && !ignoreStringStyleEnd) || replyBufManualLength) {
 		USART0.TXDATAL = replyBuf[bufPos];
 		bufPos++;
+		if (replyBufManualLength) {
+			 replyBufManualLength--;
+			 if (replyBuf[bufPos] == '\0') {
+				 ignoreStringStyleEnd = 1;
+			 }
+		}
 	}
 	else {
 		bufPos = 0;
+		ignoreStringStyleEnd = 0;
+		replyBufManualLength = 0;
 		USART0.CTRLA = 0b10000000;	//disable data out interrupt
 		USART0.STATUS |= USART_RXCIE_bm;
 	}
@@ -314,6 +325,7 @@ ISR(USART0_RXC_vect) {
 			break;
 			
 		case 'U': // resend last received data
+		replyBufManualLength = 15;
 			SERIAL_SEND;
 			break;
 			
