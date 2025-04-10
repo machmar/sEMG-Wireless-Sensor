@@ -2,7 +2,7 @@
 import serial
 import serial.tools.list_ports
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtWidgets
+from pyqtgraph.Qt import QtCore, QtWidgets, QtGui
 import sys
 import time
 import math
@@ -57,15 +57,13 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.data2 = deque(maxlen=self.max_points)
         self.timestamps = deque(maxlen=self.max_points)
 
-        self.init_ui()         # UI first
-        self.try_connect()     # then try connecting
+        self.init_ui()
+        self.try_connect()
 
-        # Plot update timer
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(10)
 
-        # Auto-reconnect timer
         self.reconnect_timer = QtCore.QTimer()
         self.reconnect_timer.timeout.connect(self.try_connect)
         self.reconnect_timer.start(2000)
@@ -76,7 +74,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
-        # Status panel
+        # --- Status Panel ---
         self.status_panel = QtWidgets.QVBoxLayout()
         self.status_panel.setAlignment(QtCore.Qt.AlignTop)
 
@@ -95,33 +93,48 @@ class SerialPlotter(QtWidgets.QMainWindow):
         status_container.setLayout(self.status_panel)
         status_container.setFixedWidth(200)
 
-        # Plot area
+        # --- Plot Area ---
         self.plot_area = pg.GraphicsLayoutWidget()
         layout = self.plot_area.ci.layout
 
-        self.plot1 = self.plot_area.addPlot(row=0, col=0, title="Raw Signals")
+        # Raw signals (top 10%)
+        self.plot1 = self.plot_area.addPlot(row=0, col=0)
+        self.add_plot_title(self.plot1, "Raw Signals")
         self.plot1.showGrid(x=True, y=True)
         self.plot1.setLabel('left', 'Values')
-        self.plot1.setLabel('bottom', 'Time (s)')
+        self.plot1.getAxis('bottom').setLabel("")
         self.curve1 = self.plot1.plot(pen='y')
         self.curve2 = self.plot1.plot(pen='c')
 
-        self.plot2 = self.plot_area.addPlot(row=1, col=0, title="Difference & RMS Envelope")
+        # Difference (middle 10%)
+        self.plot2 = self.plot_area.addPlot(row=1, col=0)
+        self.add_plot_title(self.plot2, "Difference (Value1 - Value2)")
         self.plot2.showGrid(x=True, y=True)
-        self.plot2.setLabel('left', 'Difference')
-        self.plot2.setLabel('bottom', 'Time (s)')
+        self.plot2.setLabel('left', 'Diff')
+        self.plot2.getAxis('bottom').setLabel("")
+        self.curve_diff = self.plot2.plot(pen=pg.mkPen((150, 150, 150), width=1))
 
-        self.curve_diff = self.plot2.plot()
-        self.curve_diff.setPen(pg.mkPen((150, 150, 150), width=1))  # grey, thin
+        # RMS Envelope (bottom 80%)
+        self.plot3 = self.plot_area.addPlot(row=2, col=0)
+        self.add_plot_title(self.plot3, "RMS Envelope")
+        self.plot3.showGrid(x=True, y=True)
+        self.plot3.setLabel('left', 'RMS')
+        self.plot3.setLabel('bottom', 'Time (s)')
+        self.curve_env = self.plot3.plot(pen=pg.mkPen('w', width=3))
 
-        self.curve_env = self.plot2.plot()
-        self.curve_env.setPen(pg.mkPen('w', width=2))  # white, thick
-
+        # Set layout row proportions: 10%, 10%, 80%
         layout.setRowStretchFactor(0, 1)
-        layout.setRowStretchFactor(1, 9)
+        layout.setRowStretchFactor(1, 1)
+        layout.setRowStretchFactor(2, 8)
 
         main_layout.addWidget(status_container)
         main_layout.addWidget(self.plot_area, stretch=1)
+
+    def add_plot_title(self, plot, text):
+        label = pg.TextItem(text, anchor=(0, 1), color=(180, 180, 180, 130))
+        label.setFont(QtGui.QFont("Arial", 12))
+        plot.addItem(label)
+        label.setPos(0, plot.getAxis('left').range[1] * 0.95)
 
     def try_connect(self):
         if self.connected:
@@ -174,15 +187,15 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 d1 = list(self.data1)
                 d2 = list(self.data2)
 
-                # Plot raw signals
+                # Plot raw
                 self.curve1.setData(ts, d1)
                 self.curve2.setData(ts, d2)
 
-                # Plot difference
+                # Difference
                 diff = [a - b for a, b in zip(d1, d2)]
                 self.curve_diff.setData(ts, diff)
 
-                # Compute RMS envelope
+                # RMS
                 squared = [x**2 for x in diff]
                 rms_values = self.rms_moving_window(squared, window_size=20)
                 self.curve_env.setData(ts[-len(rms_values):], rms_values)
@@ -192,6 +205,8 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 t_end = ts[-1]
                 self.plot1.setXRange(t_start, t_end)
                 self.plot2.setXRange(t_start, t_end)
+                self.plot3.setXRange(t_start, t_end)
+
         except Exception as e:
             print(f"Serial error: {e}")
             self.connected = False
