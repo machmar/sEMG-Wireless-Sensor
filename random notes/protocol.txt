@@ -15,6 +15,7 @@ types:
 0x03: lead status
 0x04: new pipe request, if the accept is not received on the new pipe, fallback
 0x05: new pipe accept (the device must store and verify the storage of new pipe before sending this)
+0x06: measurement state data byte: 0x00 - stop, 0x01 - start 
 0xfd: alive check
 0xfe: go to permanent sleep
 0xff: extended type, next byte is the type byte
