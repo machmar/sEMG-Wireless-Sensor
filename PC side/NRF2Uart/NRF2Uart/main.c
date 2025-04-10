@@ -325,7 +325,6 @@ ISR(USART0_RXC_vect) {
 			break;
 			
 		case 'U': // resend last received data
-		replyBufManualLength = 15;
 			SERIAL_SEND;
 			break;
 			
