@@ -55,6 +55,8 @@ int main(void)
     ccp_write_io((void *) & (CLKCTRL.OSC20MCTRLA), 0b10);
     while(CLKCTRL.MCLKSTATUS & 1);
 	
+	_delay_ms(1000); // seems to be some issue with boot, trying to fix it
+	
 	if (RSTCTRL.RSTFR & 1 << 5) {
 		strcpy(replyBuf, "\n\nFlashed, starting!\n\n\n");
 	}
@@ -75,7 +77,7 @@ int main(void)
 	ccp_write_io((void *) & (WDT.CTRLA), 0xB); // watchdog at 8 seconds
 	wdt_reset();
 	
-	SPI0.CTRLA = SPI_MASTER_bm | SPI_ENABLE_bm | 0b000; // MSB, Master, div by 4
+	SPI0.CTRLA = SPI_MASTER_bm | SPI_ENABLE_bm | 0b010; // MSB, Master, div by 16
 	SPI0.CTRLB = SPI_SSD_bm; // SS disabled, Mode 0
 	SPI0.INTCTRL = SPI_IE_bm; // interrupt on Transfer Complete
 	PORTA.DIRSET = (1 << 1) | (1 << 3) | (1 << 4); // enable MISO, SCK, CE pins
@@ -213,8 +215,8 @@ int main(void)
 				while(sendWait);
 				replyBuf[i] = gotBack;
 			}
-			replyBuf[dataWidth] = '\n';
-			replyBuf[dataWidth + 1] = 0;
+			replyBuf[dataWidth - 1] = '\n';	// !!!THIS IS TEMPORARY AND BAD, IT DELETES LAST BYTE OF TRANSMISSION, ONLY FOR TESTING, REMOVE!!!
+			replyBuf[dataWidth] = 0;
 			SERIAL_SEND;
 			
 			SPI_SEND_REG(0x27, 0x7E);
