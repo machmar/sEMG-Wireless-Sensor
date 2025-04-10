@@ -162,7 +162,7 @@ int main(void)
 		// LED stuff
 		if (flashEvent) {
 			static millis_t blinkPMill = 0;
-			if (GetMillis() - blinkPMill >= 50) {
+			if (GetMillis() - blinkPMill >= 20) {
 				blinkPMill = GetMillis();
 				static uint8_t flashStage = 0;
 				switch (flashStage) {
