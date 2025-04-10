@@ -103,3 +103,12 @@ void GROUP1_IRQHandler() {
 void SPI0_IRQHandler() {
     NRF_SPIHandler();
 }
+
+void ADC0_IRQHandler() {
+    static uint8_t cnt = 0;
+    if (cnt >= 100) {
+        cnt = 0;
+        HW_LED_RED_TGL;
+    }
+    cnt++;
+}

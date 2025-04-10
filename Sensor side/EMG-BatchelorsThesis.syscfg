@@ -24,11 +24,22 @@ const ProjectConfig = scripting.addModule("/ti/project_config/ProjectConfig");
 /**
  * Write custom configuration values to the imported modules.
  */
+const divider4       = system.clockTree["PLL_CLK0_DIV"];
+divider4.divideValue = 4;
+
+const divider9       = system.clockTree["UDIV"];
+divider9.divideValue = 2;
+
 const multiplier2         = system.clockTree["PLL_QDIV"];
-multiplier2.multiplyValue = 5;
+multiplier2.multiplyValue = 32;
+
+const mux8       = system.clockTree["HSCLKMUX"];
+mux8.inputSelect = "HSCLKMUX_SYSPLL0";
+
+const oscillator2           = system.clockTree["SYSOSC"];
+oscillator2.frequencySelect = 4;
 
 ADC121.$name                 = "ADC12_0";
-ADC121.sampClkDiv            = "DL_ADC12_CLOCK_DIVIDE_4";
 ADC121.repeatMode            = true;
 ADC121.adcMem0chansel        = "DL_ADC12_INPUT_CHAN_15";
 ADC121.adcMem1chansel        = "DL_ADC12_INPUT_CHAN_2";
@@ -37,10 +48,24 @@ ADC121.adcMem1_name          = "INAMP_DIFFERENTIAL";
 ADC121.adcMem2_name          = "INAMP_REFFERENCE";
 ADC121.adcMem2chansel        = "DL_ADC12_INPUT_CHAN_1";
 ADC121.samplingOperationMode = "sequence";
+ADC121.sampClkDiv            = "DL_ADC12_CLOCK_DIVIDE_48";
+ADC121.hwDenominator         = "DL_ADC12_HW_AVG_DEN_DIV_BY_2";
+ADC121.adcMem1avgen          = true;
+ADC121.enableHWAverage       = true;
+ADC121.adcMem2avgen          = true;
+ADC121.adcMem1stime          = "DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP1";
+ADC121.adcMem3avgen          = true;
+ADC121.adcMem4avgen          = true;
+ADC121.adcMem5avgen          = true;
+ADC121.adcMem6avgen          = true;
 ADC121.endAdd                = 2;
+ADC121.adcMem2stime          = "DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP1";
+ADC121.hwNumerator           = "DL_ADC12_HW_AVG_NUM_ACC_2";
+ADC121.sampleTime1           = "0.08 ms";
+ADC121.enabledInterrupts     = ["DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED"];
 ADC121.peripheral.$assign    = "ADC0";
 ADC121.adcPin2Config.$name   = "ti_driverlib_gpio_GPIOPinGeneric1";
-ADC121.adcPin1Config.$name   = "ti_driverlib_gpio_GPIOPinGeneric2";
+ADC121.adcPin1Config.$name   = "ti_driverlib_gpio_GPIOPinGeneric0";
 
 const Board                       = scripting.addModule("/ti/driverlib/Board", {}, false);
 Board.peripheral.$assign          = "DEBUGSS";
@@ -110,7 +135,7 @@ SPI1.misoPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 SPI1.misoPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 SPI1.misoPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric5";
 
-SYSCTL.peripheral.$assign = "SYSCTL";
+SYSCTL.clockTreeEn = true;
 
 ProjectConfig.migrationCondition = true;
 
