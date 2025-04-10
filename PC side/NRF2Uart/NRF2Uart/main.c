@@ -216,9 +216,7 @@ int main(void)
 				while(sendWait);
 				replyBuf[i] = gotBack;
 			}
-			replyBuf[dataWidth - 1] = '\n';	// !!!THIS IS TEMPORARY AND BAD, IT DELETES LAST BYTE OF TRANSMISSION, ONLY FOR TESTING, REMOVE!!!
-			replyBuf[dataWidth] = 0;
-			replyBufManualLength = dataWidth;
+			replyBufManualLength = dataWidth - 1;
 			SERIAL_SEND;
 			
 			SPI_SEND_REG(0x27, 0x7E);
