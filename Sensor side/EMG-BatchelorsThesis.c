@@ -87,7 +87,7 @@ int main(void)
         }
 
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 100) {
+        if (Millis() - SendPMill >= 5) {
             SendPMill = Millis();
             uint8_t send_data[10];
             uint32_t diff = ADC0->ULLMEM.MEMRES[1];
@@ -99,6 +99,7 @@ int main(void)
             send_data[4] = ref & 0xff;
             NRF_TXSetData(send_data, 6);
             NRF_TXTransmit();
+            HW_LED_YEL_TGL;
         }
     }
 }

@@ -117,7 +117,7 @@ bool NRF_Init() {
 }
 
 void NRF_IRQHandler() {
-    HW_LED_YEL_TGL;
+    //nothing now
 }
 
 void NRF_SPIHandler() {
