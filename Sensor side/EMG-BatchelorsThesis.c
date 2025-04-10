@@ -57,6 +57,8 @@ int main(void)
     NVIC->ISER[0] = 1 << SPI0_INT_IRQn; // enable interrupts for SPI0
 
     ADC0->ULLMEM.CTL1 |= 1 << 8; // start ADC conversions
+    ADC0->ULLMEM.CPU_INT.ICLR = 0xffffffff; // clear adc0 interrupts before enabling them
+    NVIC->ISER[0] = 1 << ADC0_INT_IRQn; // enable interrupts for ADC0
 
     if (!NRF_Init()) {
         while(1) { // nrf init gone bad, stop dead
@@ -72,20 +74,25 @@ int main(void)
         }
     }*/
 
-    //memcpy(tmp_data_, (uint8_t []){1, 2, 3, 4}, 4);
-    memcpy(tmp_data_, "Ahoj, Svete!", 13);
-
     while (1) {
         
-        if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
+        /*if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
             GPIOA->DOUTSET31_0 = 1 << 0;
         }
         else { // leads are both on
              GPIOA->DOUTCLR31_0 = 1 << 0;
-        }
+        }*/
 
         if (!cnt++) {
-            NRF_TXSetData(tmp_data_, 13);
+            uint8_t send_data[10];
+            uint32_t diff = ADC0->ULLMEM.MEMRES[1];
+            uint32_t ref = ADC0->ULLMEM.MEMRES[2];
+            send_data[0] = 0;
+            send_data[1] = diff >> 8;
+            send_data[2] = diff & 0xff;
+            send_data[3] = ref >> 8;
+            send_data[4] = ref & 0xff;
+            NRF_TXSetData(send_data, 6);
             NRF_TXTransmit();
         }
         if (cnt >= UINT16_MAX * 30) cnt = 0;
@@ -106,9 +113,15 @@ void SPI0_IRQHandler() {
 
 void ADC0_IRQHandler() {
     static uint8_t cnt = 0;
-    if (cnt >= 100) {
+    if (cnt >= 10) {
         cnt = 0;
         HW_LED_RED_TGL;
     }
     cnt++;
+
+    switch (ADC0->ULLMEM.CPU_INT.IIDX) {
+    case DL_ADC12_IIDX_MEM2_RESULT_LOADED:
+        // ADC results refreshed
+        break;
+    }
 }
