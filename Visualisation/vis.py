@@ -5,6 +5,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtWidgets
 import sys
 import time
+import math
 from collections import deque
 
 def select_serial_port():
@@ -105,7 +106,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.curve1 = self.plot1.plot(pen='y')
         self.curve2 = self.plot1.plot(pen='c')
 
-        self.plot2 = self.plot_area.addPlot(row=1, col=0, title="Difference & Envelope")
+        self.plot2 = self.plot_area.addPlot(row=1, col=0, title="Difference & RMS Envelope")
         self.plot2.showGrid(x=True, y=True)
         self.plot2.setLabel('left', 'Difference')
         self.plot2.setLabel('bottom', 'Time (s)')
@@ -134,11 +135,11 @@ class SerialPlotter(QtWidgets.QMainWindow):
             self.connected = False
             self.conn_label.setText("Connection: Disconnected")
 
-    def moving_average(self, data, window_size=20):
+    def rms_moving_window(self, data, window_size=20):
         if len(data) < window_size:
             return []
         return [
-            sum(data[i - window_size:i]) / window_size
+            math.sqrt(sum(data[i - window_size:i]) / window_size)
             for i in range(window_size, len(data) + 1)
         ]
 
@@ -169,21 +170,24 @@ class SerialPlotter(QtWidgets.QMainWindow):
             self.count_label.setText(f"Samples: {self.sample_count}")
 
             if len(self.timestamps) >= 2:
-                # Plot raw values
                 ts = list(self.timestamps)
-                self.curve1.setData(ts, list(self.data1))
-                self.curve2.setData(ts, list(self.data2))
+                d1 = list(self.data1)
+                d2 = list(self.data2)
+
+                # Plot raw signals
+                self.curve1.setData(ts, d1)
+                self.curve2.setData(ts, d2)
 
                 # Plot difference
-                diff = [a - b for a, b in zip(self.data1, self.data2)]
+                diff = [a - b for a, b in zip(d1, d2)]
                 self.curve_diff.setData(ts, diff)
 
-                # Plot envelope
-                abs_diff = [abs(x) for x in diff]
-                smoothed = self.moving_average(abs_diff, window_size=20)
-                self.curve_env.setData(ts[-len(smoothed):], smoothed)
+                # Compute RMS envelope
+                squared = [x**2 for x in diff]
+                rms_values = self.rms_moving_window(squared, window_size=20)
+                self.curve_env.setData(ts[-len(rms_values):], rms_values)
 
-                # Update x-range
+                # X axis scroll
                 t_start = max(0, ts[-1] - self.max_time)
                 t_end = ts[-1]
                 self.plot1.setXRange(t_start, t_end)
