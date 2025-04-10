@@ -231,12 +231,12 @@ NRF_State_t NRF_TXCheckAcks() {
     SPI_WAIT_TRANSFER_COMPLETE;
     
     if (got_back_[0] & 1 << 4) {
-        return TransmitFailed;
+        return State_TransmitFailed;
     }
     else if (got_back_[0] & 1 << 5) {
-        return TransmitSuccess;
+        return State_TransmitSuccess;
     }
-    return TransmitWait;
+    return State_TransmitWait;
 }
 
 bool NRF_TXCheckAcksBlocking() {

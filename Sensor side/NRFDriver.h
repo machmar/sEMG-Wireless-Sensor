@@ -5,9 +5,9 @@
 #include "Hardware.h"
 
 typedef enum {
-    TransmitWait,
-    TransmitFailed,
-    TransmitSuccess
+    State_TransmitWait,
+    State_TransmitFailed,
+    State_TransmitSuccess
 } NRF_State_t;
 
 bool NRF_Init();
