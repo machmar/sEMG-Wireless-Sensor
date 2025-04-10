@@ -7,6 +7,7 @@ import sys
 import time
 import math
 from collections import deque
+from PyQt5.QtWidgets import QPushButton, QSpacerItem, QSizePolicy
 
 def select_serial_port():
     ports = list(serial.tools.list_ports.comports())
@@ -89,6 +90,28 @@ class SerialPlotter(QtWidgets.QMainWindow):
             lbl.setStyleSheet("font-size: 14px; padding: 4px;")
             self.status_panel.addWidget(lbl)
 
+        # Spacer to push buttons to the bottom
+        self.status_panel.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        # Buttons (bottom-up)
+        self.btn_reset = QPushButton("Reset")
+        self.btn_check_battery = QPushButton("Check Battery")
+        self.btn_check_electrodes = QPushButton("Check Electrodes")
+        self.btn_stop = QPushButton("Stop Measurement")
+        self.btn_resume = QPushButton("Resume Measurement")
+
+        for btn in [
+            self.btn_resume,
+            self.btn_stop,
+            self.btn_check_electrodes,
+            self.btn_check_battery,
+            self.btn_reset,
+        ]:
+            btn.setStyleSheet("font-size: 13px; padding: 6px;")
+            self.status_panel.addWidget(btn)
+
+        self.btn_reset.clicked.connect(self.send_reset_command)
+
         status_container = QtWidgets.QWidget()
         status_container.setLayout(self.status_panel)
         status_container.setFixedWidth(200)
@@ -97,7 +120,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot_area = pg.GraphicsLayoutWidget()
         layout = self.plot_area.ci.layout
 
-        # Raw signals (top 10%)
+        # Raw signals
         self.plot1 = self.plot_area.addPlot(row=0, col=0)
         self.add_plot_title(self.plot1, "Raw Signals")
         self.plot1.showGrid(x=True, y=True)
@@ -106,7 +129,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.curve1 = self.plot1.plot(pen='y')
         self.curve2 = self.plot1.plot(pen='c')
 
-        # Difference (middle 10%)
+        # Difference
         self.plot2 = self.plot_area.addPlot(row=1, col=0)
         self.add_plot_title(self.plot2, "Difference (Value1 - Value2)")
         self.plot2.showGrid(x=True, y=True)
@@ -114,7 +137,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot2.getAxis('bottom').setLabel("")
         self.curve_diff = self.plot2.plot(pen=pg.mkPen((150, 150, 150), width=1))
 
-        # RMS Envelope (bottom 80%)
+        # RMS Envelope
         self.plot3 = self.plot_area.addPlot(row=2, col=0)
         self.add_plot_title(self.plot3, "RMS Envelope")
         self.plot3.showGrid(x=True, y=True)
@@ -122,7 +145,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot3.setLabel('bottom', 'Time (s)')
         self.curve_env = self.plot3.plot(pen=pg.mkPen('w', width=3))
 
-        # Set layout row proportions: 10%, 10%, 80%
+        # Set layout row proportions
         layout.setRowStretchFactor(0, 1)
         layout.setRowStretchFactor(1, 1)
         layout.setRowStretchFactor(2, 8)
@@ -147,6 +170,14 @@ class SerialPlotter(QtWidgets.QMainWindow):
         except:
             self.connected = False
             self.conn_label.setText("Connection: Disconnected")
+
+    def send_reset_command(self):
+        if self.connected and self.ser:
+            try:
+                self.ser.write(b'R')
+                print("Sent: R")
+            except Exception as e:
+                print(f"Failed to send reset: {e}")
 
     def rms_moving_window(self, data, window_size=20):
         if len(data) < window_size:
@@ -177,7 +208,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 self.last_data_time = time.time()
                 self.rx_label.setText("Receiving: Yes")
             else:
-                if time.time() - self.last_data_time > 0.5:
+                if time.time() - self.last_data_time > 0.1:
                     self.rx_label.setText("Receiving: No")
 
             self.count_label.setText(f"Samples: {self.sample_count}")
