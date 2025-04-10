@@ -228,9 +228,10 @@ int main(void)
 			break;
 		
 		case State_TransmissionStart:
+			CE_LOW;
 			NRF_CLEAR_AND_IDLE;
-			SPI_SEND_REG(0x20, 0x4E); // enable interrupt for got acks and max retries, TX mode
 			SPI_SEND_REG(0xE1, 0x00); // flush TX fifo
+			SPI_SEND_REG(0x20, 0x4E); // enable interrupt for got acks and max retries, TX mode
 			//fill fifo
 			CS_LOW;
 			SPI_SEND(0xA0); // start transmit data transmission
