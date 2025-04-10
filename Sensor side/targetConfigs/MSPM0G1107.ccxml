@@ -8,11 +8,16 @@
             <instance XML_version="1.2" href="drivers/tixds510sec_ap.xml" id="drivers" xml="tixds510sec_ap.xml" xmlpath="drivers"/>
             <property Type="choicelist" Value="1" id="The JTAG TCLK Frequency (MHz)">
                 <choice Name="Fixed with user specified value" value="SPECIFIC">
-                    <property Type="stringfield" Value="1MHz" id="-- Enter a value from 100.0kHz to 2.5MHz"/>
+                    <property Type="stringfield" Value="200kHz" id="-- Enter a value from 100.0kHz to 2.5MHz"/>
                 </choice>
             </property>
             <property Type="choicelist" Value="2" id="SWD Mode Settings">
                 <choice Name="SWD Mode - Aux COM port is target TDO pin" value="nothing"/>
+            </property>
+            <property id="Power Selection" Type="choicelist" Value="0">
+                <choice Name="Target supplied power" value="0">
+                    <property id="Voltage Selection" Type="choicelist" Value="0"/>
+                </choice>
             </property>
             <platform XML_version="1.2" id="platform_0">
                 <instance XML_version="1.2" desc="MSPM0G1107" href="devices/MSPM0G1107.xml" id="MSPM0G1107" xml="MSPM0G1107.xml" xmlpath="devices"/>
