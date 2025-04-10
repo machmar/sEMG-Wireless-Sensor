@@ -37,6 +37,7 @@
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 #include "Hardware.h"
 #include "NRFDriver.h"
+#include "Millis.h"
 #include <string.h>
 
 /* !!!BIG BIG ISSUE!!!
@@ -60,6 +61,8 @@ int main(void)
     ADC0->ULLMEM.CPU_INT.ICLR = 0xffffffff; // clear adc0 interrupts before enabling them
     NVIC->ISER[0] = 1 << ADC0_INT_IRQn; // enable interrupts for ADC0
 
+    MillisInit();
+
     if (!NRF_Init()) {
         while(1) { // nrf init gone bad, stop dead
             HW_LED_RED_TGL;
@@ -76,14 +79,16 @@ int main(void)
 
     while (1) {
         
-        /*if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
+        if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
             GPIOA->DOUTSET31_0 = 1 << 0;
         }
         else { // leads are both on
              GPIOA->DOUTCLR31_0 = 1 << 0;
-        }*/
+        }
 
-        if (!cnt++) {
+        static millis_t SendPMill = 0;
+        if (Millis() - SendPMill >= 100) {
+            SendPMill = Millis();
             uint8_t send_data[10];
             uint32_t diff = ADC0->ULLMEM.MEMRES[1];
             uint32_t ref = ADC0->ULLMEM.MEMRES[2];
@@ -95,7 +100,6 @@ int main(void)
             NRF_TXSetData(send_data, 6);
             NRF_TXTransmit();
         }
-        if (cnt >= UINT16_MAX * 30) cnt = 0;
     }
 }
 
@@ -113,15 +117,13 @@ void SPI0_IRQHandler() {
 
 void ADC0_IRQHandler() {
     static uint8_t cnt = 0;
-    if (cnt >= 10) {
-        cnt = 0;
-        HW_LED_RED_TGL;
-    }
-    cnt++;
-
     switch (ADC0->ULLMEM.CPU_INT.IIDX) {
     case DL_ADC12_IIDX_MEM2_RESULT_LOADED:
-        // ADC results refreshed
+        if (cnt >= 20) { // this is true each 20 cycles (runs at 999.45Hz)
+            cnt = 0;
+            MillisInterrupt();
+        }
+        cnt++;
         break;
     }
 }
