@@ -39,8 +39,8 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.sample_count = 0
 
         self.max_time = 10
-        self.sample_rate = 200
-        self.max_points = self.max_time * self.sample_rate
+        self.sample_rate = 500
+        self.max_points = int(self.max_time * self.sample_rate)
 
         self.data1 = deque(maxlen=self.max_points)
         self.data2 = deque(maxlen=self.max_points)
@@ -135,6 +135,8 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot1.getAxis('bottom').setLabel("")
         self.curve1 = self.plot1.plot(pen='y')
         self.curve2 = self.plot1.plot(pen='c')
+        self.plot1.enableAutoRange(axis='y')
+        self.plot1.setAutoVisible(y=True)
 
         self.plot2 = self.plot_area.addPlot(row=1, col=0)
         self.add_plot_title(self.plot2, "Difference (Value1 - Value2)")
@@ -142,6 +144,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot2.setLabel('left', 'Diff')
         self.plot2.getAxis('bottom').setLabel("")
         self.curve_diff = self.plot2.plot(pen=pg.mkPen((150, 150, 150), width=1))
+        self.plot2.enableAutoRange(axis='y')
 
         self.plot3 = self.plot_area.addPlot(row=2, col=0)
         self.add_plot_title(self.plot3, "RMS Envelope")
@@ -149,6 +152,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.plot3.setLabel('left', 'RMS')
         self.plot3.setLabel('bottom', 'Time (s)')
         self.curve_env = self.plot3.plot(pen=pg.mkPen('w', width=3))
+        self.plot3.enableAutoRange(axis='y')
 
         layout.setRowStretchFactor(0, 1)
         layout.setRowStretchFactor(1, 1)
