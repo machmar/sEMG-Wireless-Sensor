@@ -90,7 +90,7 @@ int main(void)
         }
 
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 500) {
+        if (Millis() - SendPMill >= 5) {
             SendPMill = Millis();
             uint8_t send_data[10];
             uint32_t diff = ADC0->ULLMEM.MEMRES[1];
@@ -100,7 +100,7 @@ int main(void)
             send_data[2] = diff & 0xff;
             send_data[3] = ref >> 8;
             send_data[4] = ref & 0xff;
-            NRF_TXSetData(send_data, 6);
+            NRF_TXSetData(send_data, 5);
             NRF_TXTransmit();
         }
 
@@ -112,13 +112,11 @@ int main(void)
             break;
 
         case State_ReceiveReady:
-            NRF_RXGet(received_data);
-            //delay_cycles(1);
+            NRF_RXGet(received_data); // add a second variable for length received
             break;
 
         case State_ReceiveWait:
             HW_LED_YEL_CLR;
-            //delay_cycles(1);
             break;
         }
     }

@@ -244,7 +244,7 @@ void NRF_TXSetData(uint8_t *dataSend, uint8_t len) {
 void NRF_TXTransmit() {
     SPI_WAIT_TRANSFER_COMPLETE;
     HW_NRF_CE_SET;
-    delay_cycles(1000);
+    delay_cycles(100); // @32MHz anything less is unreliable
     HW_NRF_CE_CLR;
 }
 

@@ -9,7 +9,7 @@ PC part communicates by transmitting on the same pipe right after sending acks, 
 after sending data and getting acks, the device must wait at least as long as it took to send and receive acks to receive any commands.
 
 types:
-0x00: sEMG data, measured at 1kHz, when ack is not received, immeadiately store the transmited packet, and any subsequent, transmit on loop until you get a reply
+0x00: sEMG data (4 data bytes 2 diff, 2 reff), measured at 1kHz, when ack is not received, immeadiately store the transmited packet, and any subsequent, transmit on loop until you get a reply
 0x01: battery level, responds in percentage
 0x02: flash LED
 0x03: lead status
@@ -32,14 +32,15 @@ PC side: flash on serial receive, or data receive
 sensor: orange solid on electrode removal, orange blink each n samples sent and acked, flash red on no ack in 30s, on flash LED blink both once
 
 System services and errors:
-(these are transmitted from the PC side to the vis app, they act as extended type messages to make it simple for decoding implementations)
+(these are transmitted from the PC side to the vis app, they act as extended type messages to make it simple for decoding implementations,
+unless othervise specified, all don't include any data bytes)
 0xff 0x01: Booting after power on
 0xff 0x02: Booting after reset command
 0xff 0x03: Booting after UPDI reset
 0xff 0x04: Booting after watchdog crash
 0xff 0x05: Booting from an unknown reset state
 0xff 0x06: Transmission error: ack not received
-0xff 0x07: Transmission error: no response from local transmitter after 10s
+0xff 0x07: Transmission error: no response from local transmitter after 10s  (followed by a singla data byte that was received form the local transmitter)
 0xff 0x08: Transmission error: message length set over 32 bytes
 0xff 0x09: Transmission error: message length set less then 1 byte
 0xff 0x0a: Controller state: Idle  
