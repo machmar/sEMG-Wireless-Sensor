@@ -3,6 +3,7 @@
 #include "NRFDriverRegs.h"
 #include "ti/driverlib/dl_spi.h"
 #include "ti/driverlib/m0p/dl_core.h"
+#include "Millis.h"
 
 #define SPI_WAIT_TRANSFER_COMPLETE while(SPI0->STAT & SPI_STAT_BUSY_MASK)
 #define SPI_WAIT_FIFO_NOT_FULL while(~SPI0->STAT & (1 << SPI_STAT_TFE_MASK))
@@ -17,8 +18,10 @@ bool interruptReceived = false;
 NRF_State_t directionsMode = State_Transmit;
 NRF_State_t receiveState = State_ReceiveWait;
 
+static millis_t interruptTimeoutPMill = 0;
+
+
 /* TODO:
-    make max retries also interrupt based
     make the set data function check if the previous data was sent out
 */
 
@@ -239,31 +242,43 @@ void NRF_TXSetData(uint8_t *dataSend, uint8_t len) {
         SPI_DATA(dataSend[i]);
         SPI_WAIT_FIFO_NOT_FULL;
     }
+    interruptTimeoutPMill = Millis();
 }
 
 void NRF_TXTransmit() {
     SPI_WAIT_TRANSFER_COMPLETE;
     HW_NRF_CE_SET;
     delay_cycles(100); // @32MHz anything less is unreliable
+    interruptTimeoutPMill = Millis(); // do this as well since we're waiting anyway
     HW_NRF_CE_CLR;
 }
 
 NRF_State_t NRF_CheckState() {
     if (directionsMode == State_Transmit) {
-        if (!interruptReceived) return State_TransmitWait;
-        interruptReceived = false;
-        SPI_WAIT_TRANSFER_COMPLETE;
-        HW_NRF_CS_CLR;
-        SPI_DATA(0xff);
-        SPI_WAIT_TRANSFER_COMPLETE;
-        
-        if (got_back_[0] & 1 << 4) {
-            return State_TransmitFailed;
+        if (!interruptReceived) {
+            if (Millis() - interruptTimeoutPMill >= 1000) { // if interrupt doesn't come in 1s, mark it as failed (the code should handle failed and success nearly identically)
+                return State_TransmitFailed;
+            }
+            else {
+                return State_TransmitWait;
+            }
         }
-        else if (got_back_[0] & 1 << 5) {
-            return State_TransmitSuccess;
+        else {
+            interruptTimeoutPMill = Millis();
+            interruptReceived = false;
+            SPI_WAIT_TRANSFER_COMPLETE;
+            HW_NRF_CS_CLR;
+            SPI_DATA(0xff);
+            SPI_WAIT_TRANSFER_COMPLETE;
+            
+            if (got_back_[0] & 1 << 4) {
+                return State_TransmitFailed;
+            }
+            else if (got_back_[0] & 1 << 5) {
+                return State_TransmitSuccess;
+            }
+            return State_TransmitWait;
         }
-        return State_TransmitWait;
     }
     else if (directionsMode == State_Receive) {
         return receiveState;
