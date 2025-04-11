@@ -11,7 +11,8 @@ typedef enum {
     State_Transmit,
     State_Receive,
     State_ReceiveWait,
-    State_ReceiveReady
+    State_ReceiveReady,
+    State_ReceiveIdle
 } NRF_State_t;
 
 bool NRF_Init();
@@ -30,9 +31,7 @@ bool NRF_TXCheckAcksBlocking();
 
 void NRF_RXStart();
 
-NRF_State_t NRF_RXGet(uint8_t *buffer);
-
-
+NRF_State_t NRF_RXGet(uint8_t *buffer, uint32_t *length);
 
 void NRF_IRQHandler();
 

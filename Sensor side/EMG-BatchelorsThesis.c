@@ -46,10 +46,13 @@
 
 uint8_t tmp_data_[32];
 uint8_t received_data[32];
+uint32_t received_data_length = 0;
 
 uint16_t emg_dif_data[5];
 uint16_t emg_ref_data[5];
 uint32_t emg_data_pos = 0;
+
+bool measurement_stopped_ = false;
 
 int main(void)
 {
@@ -76,13 +79,6 @@ int main(void)
         }
     }
 
-    /*if (!NRF_TXPipe(0x0123456788)) { //receiving is broken
-        while(1) { // nrf init gone bad, stop dead
-            HW_LED_RED_TGL;
-            for (uint32_t i = 0; i < 200000; i++);
-        }
-    }*/
-
     while (1) {
         
         if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
@@ -93,7 +89,7 @@ int main(void)
         }
 
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 10) {
+        if (Millis() - SendPMill >= 10 && !measurement_stopped_) {
             SendPMill = Millis();
             static uint8_t send_data[35] = {0};
             for (uint32_t i = 0; i < 5 && i < emg_data_pos; i++) {
@@ -108,6 +104,9 @@ int main(void)
             emg_data_pos = 0;
             NRF_TXTransmit();
         }
+        else if(measurement_stopped_) {
+
+        }
 
         NRF_State_t state = NRF_CheckState();
         switch (state) {
@@ -117,7 +116,42 @@ int main(void)
             break;
 
         case State_ReceiveReady:
-            NRF_RXGet(received_data); // add a second variable for length received
+            NRF_RXGet(received_data, received_data_length);
+            switch (received_data[0]) {
+            case 0x01: // requested batterry level
+                break;
+
+            case 0x02: // requested to flash an LED
+                HW_LED_RED_TGL; // temporary, needs to be done better
+                break;
+
+            case 0x03: // requested a status of the electrode attachment
+                break;
+
+            case 0x06: // setting measurement state
+                if (received_data[1] == 0x00)
+                    measurement_stopped_ = true;
+                else if(received_data[1] == 0x01)
+                    measurement_stopped_ = false;
+                break;
+
+            case 0xfd: // alive check
+                break;
+
+            case 0xfe: // shutdown
+                break;
+
+            case 0xff: // extended type range
+                switch(received_data[1]) {
+                default:
+                    // nothing implemented now
+                    break;
+                }
+            }
+            break;
+
+        case State_ReceiveIdle:
+            NRF_RXStart();
             break;
 
         case State_ReceiveWait:

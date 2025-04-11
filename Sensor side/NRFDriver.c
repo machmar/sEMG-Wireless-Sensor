@@ -167,7 +167,7 @@ void NRF_SPIHandler() {
 
 }
 
-bool NRF_TXPipe(uint64_t address) {
+bool NRF_TXPipe(uint64_t address) { // this is broken (confirmation doesn't work)
     uint8_t address_bytes[5];
 
     GoStandbyTX();
@@ -304,8 +304,8 @@ NRF_State_t NRF_DirectionState() {
     return directionsMode;
 }
 
-NRF_State_t NRF_RXGet(uint8_t *buffer) {
-    if (receiveState == State_ReceiveWait) return State_ReceiveWait;
+NRF_State_t NRF_RXGet(uint8_t *buffer, uint32_t *length) {
+    if (receiveState != State_ReceiveReady) return receiveState;
     HW_NRF_CE_CLR;
     HW_NRF_CS_CLR;
     SPI_DATA(0x60);
@@ -324,7 +324,8 @@ NRF_State_t NRF_RXGet(uint8_t *buffer) {
         buffer[i] = got_back_[i + 1];
     }
     
-    receiveState = State_ReceiveWait;
+    length = dataWidth;
+    receiveState = State_ReceiveIdle;
     GoStandbyRX();
     return State_ReceiveReady;
 }
