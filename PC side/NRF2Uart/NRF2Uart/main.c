@@ -269,7 +269,7 @@ int main(void)
 				CS_LOW;
 				SPI_SEND(0xff);
 				CS_HIGH;
-				memcpy(replyBuf, (char []){0xff, 0x07, gotBack}, 3);
+				memcpy(replyBuf, (char []){0xff, 0x07, gotBack}, 3); // there is still something weird with this (reply is FFh 07h FFh 08h 54h)
 				replyBufManualLength = 3; // has to be here as the last byte could be 0 (and it would get treated as end of string and not be sent)
 				SERIAL_SEND;
 				NRFState = State_Idle;
