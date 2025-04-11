@@ -7,7 +7,8 @@ import sys
 import time
 import math
 from collections import deque
-from PyQt5.QtWidgets import QPushButton, QSpacerItem, QSizePolicy, QLabel, QTextEdit
+from PyQt5.QtWidgets import QPushButton, QSpacerItem, QSizePolicy, QLabel, QTextEdit, QSplitter, QGridLayout, QWidget, QVBoxLayout
+
 
 def select_serial_port():
     ports = list(serial.tools.list_ports.comports())
@@ -19,6 +20,7 @@ def select_serial_port():
     idx = int(input("Select COM port: "))
     baudrate = int(input("Enter baudrate: "))
     return ports[idx].device, baudrate
+
 
 class SerialPlotter(QtWidgets.QMainWindow):
     def __init__(self, port, baudrate):
@@ -75,13 +77,14 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.reconnect_timer.start(2000)
 
     def init_ui(self):
-        main_widget = QtWidgets.QWidget()
-        main_layout = QtWidgets.QHBoxLayout()
-        main_widget.setLayout(main_layout)
-        self.setCentralWidget(main_widget)
+        splitter = QSplitter(QtCore.Qt.Horizontal)
+        splitter.setHandleWidth(10)
+        self.setCentralWidget(splitter)
 
-        self.status_panel = QtWidgets.QVBoxLayout()
-        self.status_panel.setAlignment(QtCore.Qt.AlignTop)
+        left_panel = QWidget()
+        left_layout = QVBoxLayout()
+        left_panel.setLayout(left_layout)
+        left_panel.setMinimumWidth(160)
 
         self.conn_label = QLabel("Connection: Checking...")
         self.rx_label = QLabel("Receiving: No")
@@ -92,36 +95,34 @@ class SerialPlotter(QtWidgets.QMainWindow):
         for lbl in [self.conn_label, self.rx_label, self.count_label,
                     self.electrode_label, self.battery_label]:
             lbl.setStyleSheet("font-size: 14px; padding: 4px;")
-            self.status_panel.addWidget(lbl)
+            left_layout.addWidget(lbl)
 
         self.log_box = QTextEdit()
         self.log_box.setReadOnly(True)
-        self.log_box.setFixedHeight(150)
-        self.log_box.setStyleSheet("font-size: 11px; background-color: #f5f5f5; padding: 4px;")
-        self.status_panel.addWidget(self.log_box)
+        self.log_box.setStyleSheet("font-size: 11px;")
+        left_layout.addWidget(self.log_box, 1)
 
-        self.status_panel.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        btn_grid = QGridLayout()
+        buttons = [
+            ("Reset", self.send_reset_command),
+            ("Check Battery", self.send_check_battery),
+            ("Check Electrodes", self.send_check_electrodes),
+            ("Stop Measurement", self.send_stop_command),
+            ("Resume Measurement", self.send_resume_command),
+            ("Status", self.send_status_command)
+        ]
 
-        self.btn_reset = QPushButton("Reset")
-        self.btn_check_battery = QPushButton("Check Battery")
-        self.btn_check_electrodes = QPushButton("Check Electrodes")
-        self.btn_stop = QPushButton("Stop Measurement")
-        self.btn_resume = QPushButton("Resume Measurement")
-        self.btn_status = QPushButton("Status")
-
-        for btn in [self.btn_resume, self.btn_stop, self.btn_check_electrodes,
-                    self.btn_check_battery, self.btn_reset, self.btn_status]:
+        for index, (text, handler) in enumerate(buttons):
+            btn = QPushButton(text)
             btn.setStyleSheet("font-size: 13px; padding: 6px;")
-            self.status_panel.addWidget(btn)
+            btn.clicked.connect(handler)
+            row = index // 2
+            col = index % 2
+            btn_grid.addWidget(btn, row, col)
 
-        self.btn_reset.clicked.connect(self.send_reset_command)
-        self.btn_stop.clicked.connect(self.send_stop_command)
-        self.btn_resume.clicked.connect(self.send_resume_command)
-        self.btn_status.clicked.connect(self.send_status_command)
+        left_layout.addLayout(btn_grid)
 
-        status_container = QtWidgets.QWidget()
-        status_container.setLayout(self.status_panel)
-        status_container.setFixedWidth(200)
+        splitter.addWidget(left_panel)
 
         self.plot_area = pg.GraphicsLayoutWidget()
         layout = self.plot_area.ci.layout
@@ -152,8 +153,8 @@ class SerialPlotter(QtWidgets.QMainWindow):
         layout.setRowStretchFactor(1, 1)
         layout.setRowStretchFactor(2, 8)
 
-        main_layout.addWidget(status_container)
-        main_layout.addWidget(self.plot_area, stretch=1)
+        splitter.addWidget(self.plot_area)
+        splitter.setStretchFactor(1, 1)
 
     def add_plot_title(self, plot, text):
         label = pg.TextItem(text, anchor=(0, 1), color=(180, 180, 180, 130))
@@ -179,6 +180,20 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 self.ser.write(b'R')
             except Exception as e:
                 print(f"Failed to send reset: {e}")
+
+    def send_check_battery(self):
+        if self.connected and self.ser:
+            try:
+                self.ser.write(bytes([0x54, 0x01, 0x01]))
+            except Exception as e:
+                print(f"Failed to send battery check: {e}")
+
+    def send_check_electrodes(self):
+        if self.connected and self.ser:
+            try:
+                self.ser.write(bytes([0x54, 0x01, 0x03]))
+            except Exception as e:
+                print(f"Failed to send check electrodes command: {e}")
 
     def send_stop_command(self):
         if self.connected and self.ser:
@@ -220,7 +235,8 @@ class SerialPlotter(QtWidgets.QMainWindow):
                     i += 3
                 else:
                     i += 2
-                self.log_box.append(msg)
+                timestamp = time.strftime('%H:%M:%S')
+                self.log_box.append(f"[{timestamp}] {msg}")
                 self.log_box.verticalScrollBar().setValue(self.log_box.verticalScrollBar().maximum())
             else:
                 i += 1
@@ -274,6 +290,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 self.ser.close()
             except:
                 pass
+
 
 if __name__ == "__main__":
     port, baudrate = select_serial_port()
