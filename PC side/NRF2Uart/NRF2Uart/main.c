@@ -255,6 +255,8 @@ int main(void)
 				SPI_SEND(0xff); // get status byte
 				CS_HIGH;
 				if (gotBack & (1 << 5)) { // successful transfer
+					strcpy(replyBuf, "Sent!");
+					SERIAL_SEND;
 					NRFState = State_TransmissionConfirm;
 				}
 				else if (gotBack & (1 << 4)) { // failed transmission
@@ -370,12 +372,15 @@ ISR(USART0_RXC_vect) {
 			}
 		}
 	}
-	else {
+	else { // I know this part is confusing, even I don't exactly understand it lol (off by one city)
 		if (receivingTransmitData == 1) {
 			if (received > 32) {
 				strcpy(replyBuf, "Error: max length 32!");
 				receivingTransmitData = 0;
 				SERIAL_SEND;
+			}
+			else if (received < 1) {
+				receivingTransmitData = 0; // message length 0 bytes
 			}
 			else {
 				numBytesExpected = received;
@@ -383,12 +388,13 @@ ISR(USART0_RXC_vect) {
 			}
 		}
 		else {
-			if (receivingTransmitData < (numBytesExpected + 2)) {
+			if (receivingTransmitData < (numBytesExpected + 1)) {
 				sendData[receivingTransmitData - 2] = received;
 				receivingTransmitData++;
 			}
 			else {
-				dealWithTransmission = receivingTransmitData - 2;
+				sendData[receivingTransmitData - 2] = received;
+				dealWithTransmission = receivingTransmitData - 1;
 				receivingTransmitData = 0;
 				broadcastPMill = GetMillis();
 			}
