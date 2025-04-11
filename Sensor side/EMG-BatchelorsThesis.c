@@ -38,6 +38,7 @@
 #include "Hardware.h"
 #include "NRFDriver.h"
 #include "Millis.h"
+#include "TransmitFifo.h"
 #include <string.h>
 
 /* !!!BIG BIG ISSUE!!!
@@ -53,6 +54,7 @@ uint16_t emg_ref_data[5];
 uint32_t emg_data_pos = 0;
 
 bool measurement_stopped_ = false;
+bool electrodes_attachhed_ = false;
 
 int main(void)
 {
@@ -69,6 +71,7 @@ int main(void)
     NVIC->ISER[0] = 1 << ADC0_INT_IRQn; // enable interrupts for ADC0
 
     MillisInit();
+    TransmitFifo_Init();
 
     for (uint32_t i = 0; i < 32; i++) received_data[i] = 0;
 
@@ -81,15 +84,23 @@ int main(void)
 
     while (1) {
         
-        if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
-            GPIOA->DOUTSET31_0 = 1 << 0;
-        }
-        else { // leads are both on
-             GPIOA->DOUTCLR31_0 = 1 << 0;
+        static millis_t electrodeCheckPMill = 0;
+        if (Millis() - electrodeCheckPMill >= 100) {
+            electrodeCheckPMill = Millis();
+            if (GPIOA->DIN31_0 & 1 << 24) { // lead is off
+                electrodes_attachhed_ = false;
+                GPIOA->DOUTSET31_0 = 1 << 0;
+            }
+            else { // leads are both on
+                electrodes_attachhed_ = true;
+                GPIOA->DOUTCLR31_0 = 1 << 0;
+            }
         }
 
+        static uint8_t requestedType = 0;
+        static uint8_t requestedTypeData = 0;
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 10 && !measurement_stopped_) {
+        if (Millis() - SendPMill >= 1000 && !measurement_stopped_) {
             SendPMill = Millis();
             static uint8_t send_data[35] = {0};
             for (uint32_t i = 0; i < 5 && i < emg_data_pos; i++) {
@@ -104,21 +115,47 @@ int main(void)
             emg_data_pos = 0;
             NRF_TXTransmit();
         }
-        else if(measurement_stopped_) {
+        else if(TransmitFifo_Get(&requestedType, &requestedTypeData)) {
+            static uint8_t send_data[2] = {0};
+            switch(requestedType) {
+            case 0x01: // requested batterry level
+                send_data[0] = 0x01;
+                send_data[1] = ADC0->ULLMEM.MEMRES[1] >> (12 - 8);
+                NRF_TXSetData(send_data, 2);
+                NRF_TXTransmit();
+                break;
 
+            case 0x03: // requested a status of the electrode attachment
+                send_data[0] = 0x03;
+                send_data[1] = electrodes_attachhed_;
+                NRF_TXSetData(send_data, 2);
+                NRF_TXTransmit();
+                break;
+
+            case 0xfd: // alive check
+                send_data[0] = 0xfd;
+                NRF_TXSetData(send_data, 1);
+                NRF_TXTransmit();
+                break;
+
+            default: // don't care about them here
+                break;
+            }
         }
 
         NRF_State_t state = NRF_CheckState();
         switch (state) {
+        case State_TransmitFailed: // for now do nothing, just go into receive mode anyway
         case State_TransmitSuccess:
             HW_LED_YEL_SET;
             NRF_RXStart();
             break;
 
         case State_ReceiveReady:
-            NRF_RXGet(received_data, received_data_length);
+            NRF_RXGet(received_data, &received_data_length);
             switch (received_data[0]) {
             case 0x01: // requested batterry level
+                TransmitFifo_Add(0x01, 0x00);
                 break;
 
             case 0x02: // requested to flash an LED
@@ -126,6 +163,7 @@ int main(void)
                 break;
 
             case 0x03: // requested a status of the electrode attachment
+                TransmitFifo_Add(0x03, 0x00);
                 break;
 
             case 0x06: // setting measurement state
@@ -136,6 +174,7 @@ int main(void)
                 break;
 
             case 0xfd: // alive check
+                TransmitFifo_Add(0xfd, 0x00);
                 break;
 
             case 0xfe: // shutdown

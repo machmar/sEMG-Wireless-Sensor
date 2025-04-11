@@ -324,7 +324,7 @@ NRF_State_t NRF_RXGet(uint8_t *buffer, uint32_t *length) {
         buffer[i] = got_back_[i + 1];
     }
     
-    length = dataWidth;
+    *length = dataWidth;
     receiveState = State_ReceiveIdle;
     GoStandbyRX();
     return State_ReceiveReady;

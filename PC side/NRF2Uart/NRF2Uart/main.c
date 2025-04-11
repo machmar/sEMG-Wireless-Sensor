@@ -201,7 +201,7 @@ int main(void)
 				CE_LOW;
 				NRFState = State_ReceptionReady;
 			}
-			if (dealWithTransmission && GetMillis() - broadcastPMill > 30000) { // not received anything in 30s, send stuff right away
+			if (dealWithTransmission && GetMillis() - broadcastPMill > 5000) { // not received anything in 5s, send stuff right away
 				NRFState = State_TransmissionStart;
 			}
 			break;
@@ -212,10 +212,14 @@ int main(void)
 			uint8_t dataWidth = gotBack;
 			CS_LOW;
 			SPI_SEND(0x61); // start received data transmission
-			for (uint8_t i = 0; i < dataWidth; i++) {
+			uint8_t i;
+			for (i = 0; i < dataWidth; i++) {
 				SPI_SEND(0x00); // getting data
 				while(sendWait);
 				replyBuf[i] = gotBack;
+			}
+			for (; i < sizeof(replyBuf); i++) { // flush the rest of the buffer
+				replyBuf[i] = 0;
 			}
 			replyBufManualLength = dataWidth - 1;
 			SERIAL_SEND;
@@ -265,7 +269,7 @@ int main(void)
 				}
 				NRF_CLEAR_AND_IDLE;
 			}
-			if (GetMillis() - broadcastPMill > 10000) { // the transmission interrupt hasent come after 10s
+			if (GetMillis() - broadcastPMill > 10000) { // the transmission interrupt hasn't come after 10s
 				CS_LOW;
 				SPI_SEND(0xff);
 				CS_HIGH;
