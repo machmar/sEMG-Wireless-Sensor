@@ -95,6 +95,11 @@ int main(void)
                 electrodes_attachhed_ = true;
                 GPIOA->DOUTCLR31_0 = 1 << 0;
             }
+            static electrodes_prev = false;
+            if (electrodes_prev != electrodes_attachhed_) {
+                electrodes_prev = electrodes_attachhed_;
+                TransmitFifo_Add(0x03, 0x00);
+            }
         }
 
         static uint8_t requestedType = 0;
@@ -121,20 +126,20 @@ int main(void)
             case 0x01: // requested batterry level
                 send_data[0] = 0x01;
                 send_data[1] = ADC0->ULLMEM.MEMRES[1] >> (12 - 8);
-                NRF_TXSetData(send_data, 2);
+                NRF_TXSetData(send_data, 3);
                 NRF_TXTransmit();
                 break;
 
             case 0x03: // requested a status of the electrode attachment
                 send_data[0] = 0x03;
                 send_data[1] = electrodes_attachhed_;
-                NRF_TXSetData(send_data, 2);
+                NRF_TXSetData(send_data, 3);
                 NRF_TXTransmit();
                 break;
 
             case 0xfd: // alive check
                 send_data[0] = 0xfd;
-                NRF_TXSetData(send_data, 1);
+                NRF_TXSetData(send_data, 2);
                 NRF_TXTransmit();
                 break;
 
