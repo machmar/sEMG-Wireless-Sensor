@@ -30,3 +30,22 @@ if no acks are received for 30 seconds, go to fallback sending new pipe request 
 LEDs:
 PC side: flash on serial receive, or data receive
 sensor: orange solid on electrode removal, orange blink each n samples sent and acked, flash red on no ack in 30s, on flash LED blink both once
+
+System services and errors:
+(these are transmitted from the PC side to the vis app, they act as extended type messages to make it simple for decoding implementations)
+0xff 0x01: Booting after power on
+0xff 0x02: Booting after reset command
+0xff 0x03: Booting after UPDI reset
+0xff 0x04: Booting after watchdog crash
+0xff 0x05: Booting from an unknown reset state
+0xff 0x06: Transmission error: ack not received
+0xff 0x07: Transmission error: no response from local transmitter after 10s
+0xff 0x08: Transmission error: message length set over 32 bytes
+0xff 0x09: Transmission error: message length set less then 1 byte
+0xff 0x0a: Controller state: Idle  
+0xff 0x0b: Controller state: ReceptionWait  
+0xff 0x0c: Controller state: ReceptionReady  
+0xff 0x0d: Controller state: TransmissionStart  
+0xff 0x0e: Controller state: TransmissionWait  
+0xff 0x0f: Controller state: TransmissionConfirm  
+0xff 0x10: Controller state: UnknownState

@@ -9,6 +9,7 @@
 #include <avr/cpufunc.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include <string.h>
 #include "util/delay.h"
 
 #define SERIAL_SEND USART0.CTRLA = 0b10100000
@@ -28,7 +29,7 @@ void inline AddFlashEvent();
 
 millis_t broadcastPMill = 0;
 
-char replyBuf[50] = "Ahhoj haha\n\n\n";
+char replyBuf[50] = {0};
 uint8_t replyBufManualLength = 0;
 char sendData[35] = {0};
 _Bool volatile sendWait = 0;
@@ -58,20 +59,20 @@ int main(void)
 	
 	_delay_ms(1000); // seems to be some issue with boot, trying to fix it
 	
-	if (RSTCTRL.RSTFR & 1 << 5) {
-		strcpy(replyBuf, "\n\nFlashed, starting!\n\n\n");
+	if (RSTCTRL.RSTFR & 1 << 5) { // start after UPDI reset
+		memcpy(replyBuf, (char []){0xff, 0x03, 0x00}, 3);
 	}
-	else if (RSTCTRL.RSTFR & 1 << 4) {
-		strcpy(replyBuf, "\n\nUp again, starting!\n\n\n");
+	else if (RSTCTRL.RSTFR & 1 << 4) { // start after software reset
+		memcpy(replyBuf, (char []){0xff, 0x02, 0x00}, 3);
 	}
-	else if (RSTCTRL.RSTFR & 1 << 3) {
-		strcpy(replyBuf, "\n\nWatchdog Crash!, starting!\n\n\n");
+	else if (RSTCTRL.RSTFR & 1 << 3) { // start after watchdog crash
+		memcpy(replyBuf, (char []){0xff, 0x04, 0x00}, 3);
 	}
-	else if (RSTCTRL.RSTFR & 1 << 0) {
-		strcpy(replyBuf, "\n\nAhhoj haha, starting!\n\n\n");
+	else if (RSTCTRL.RSTFR & 1 << 0) { // start after power on reset
+		memcpy(replyBuf, (char []){0xff, 0x01, 0x00}, 3);
 	}
-	else {
-		strcpy(replyBuf, "\n\nIdk how that happenned, starting!\n\n\n");
+	else { // some other type of reset
+		memcpy(replyBuf, (char []){0xff, 0x05, 0x00}, 3);
 	}
 	RSTCTRL.RSTFR = 0x3F; // clear reset source
 	
@@ -255,22 +256,21 @@ int main(void)
 				SPI_SEND(0xff); // get status byte
 				CS_HIGH;
 				if (gotBack & (1 << 5)) { // successful transfer
-					strcpy(replyBuf, "Sent!");
-					SERIAL_SEND;
 					NRFState = State_TransmissionConfirm;
 				}
-				else if (gotBack & (1 << 4)) { // failed transmission
-					strcpy(replyBuf, "Error: Ack not received!");
+				else if (gotBack & (1 << 4)) { // failed transmission (no ack received)
+					memcpy(replyBuf, (char []){0xff, 0x06, 0x00}, 3);
 					SERIAL_SEND;
 					NRFState = State_Idle;
 				}
 				NRF_CLEAR_AND_IDLE;
 			}
-			if (GetMillis() - broadcastPMill > 10000) {
+			if (GetMillis() - broadcastPMill > 10000) { // the transmission interrupt hasent come after 10s
 				CS_LOW;
 				SPI_SEND(0xff);
 				CS_HIGH;
-				sprintf(replyBuf, "Error: No interrupt in 10s, State: %02X", gotBack);
+				memcpy(replyBuf, (char []){0xff, 0x07, gotBack}, 3);
+				replyBufManualLength = 3; // has to be here as the last byte could be 0 (and it would get treated as end of string and not be sent)
 				SERIAL_SEND;
 				NRFState = State_Idle;
 			}
@@ -336,37 +336,37 @@ ISR(USART0_RXC_vect) {
 		case 'S':
 			switch(NRFState) {
 			case State_Idle:
-				strcpy(replyBuf, "Idle");
+				memcpy(replyBuf, (char []){0xff, 0x0a, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 				
 			case State_ReceptionWait:
-				strcpy(replyBuf, "ReceptionWait");
+				memcpy(replyBuf, (char []){0xff, 0x0b, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 				
 			case State_ReceptionReady:
-				strcpy(replyBuf, "ReceptionReady");
+				memcpy(replyBuf, (char []){0xff, 0x0c, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 
 			case State_TransmissionStart:
-				strcpy(replyBuf, "TransmissionStart");
+				memcpy(replyBuf, (char []){0xff, 0x0d, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 
 			case State_TransmissionWait:
-				strcpy(replyBuf, "TransmissionWait");
+				memcpy(replyBuf, (char []){0xff, 0x0e, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 
 			case State_TransmissionConfirm:
-				strcpy(replyBuf, "TransmissionConfirm");
+				memcpy(replyBuf, (char []){0xff, 0x0f, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 
 			default:
-				strcpy(replyBuf, "UnknownState");
+				memcpy(replyBuf, (char []){0xff, 0x10, 0x00}, 3);
 				SERIAL_SEND;
 				break;
 			}
@@ -374,13 +374,15 @@ ISR(USART0_RXC_vect) {
 	}
 	else { // I know this part is confusing, even I don't exactly understand it lol (off by one city)
 		if (receivingTransmitData == 1) {
-			if (received > 32) {
-				strcpy(replyBuf, "Error: max length 32!");
+			if (received > 32) { // more than 32 bytes set
 				receivingTransmitData = 0;
+				memcpy(replyBuf, (char []){0xff, 0x08, 0x00}, 3);
 				SERIAL_SEND;
 			}
-			else if (received < 1) {
-				receivingTransmitData = 0; // message length 0 bytes
+			else if (received < 1) { // message length 0 bytes
+				receivingTransmitData = 0;
+				memcpy(replyBuf, (char []){0xff, 0x09, 0x00}, 3);
+				SERIAL_SEND;
 			}
 			else {
 				numBytesExpected = received;
