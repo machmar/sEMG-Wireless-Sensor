@@ -44,9 +44,12 @@
  * Setting a value to a global variable does not guarantee it having that value during execution for some reason!
 */
 
-uint32_t cnt;
 uint8_t tmp_data_[32];
 uint8_t received_data[32];
+
+uint16_t emg_dif_data[5];
+uint16_t emg_ref_data[5];
+uint32_t emg_data_pos = 0;
 
 int main(void)
 {
@@ -90,17 +93,19 @@ int main(void)
         }
 
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 5) {
+        if (Millis() - SendPMill >= 10) {
             SendPMill = Millis();
-            uint8_t send_data[10];
-            uint32_t diff = ADC0->ULLMEM.MEMRES[1];
-            uint32_t ref = ADC0->ULLMEM.MEMRES[2];
-            send_data[0] = 0;
-            send_data[1] = diff >> 8;
-            send_data[2] = diff & 0xff;
-            send_data[3] = ref >> 8;
-            send_data[4] = ref & 0xff;
-            NRF_TXSetData(send_data, 5);
+            static uint8_t send_data[35] = {0};
+            for (uint32_t i = 0; i < 5 && i < emg_data_pos; i++) {
+                uint32_t pos = i * 5;
+                send_data[0 + pos] = 0x00;
+                send_data[1 + pos] = (emg_dif_data[i] >> 8) & 0xff;
+                send_data[2 + pos] = emg_dif_data[i] & 0xff;
+                send_data[3 + pos] = (emg_ref_data[i] >> 8) & 0xff;
+                send_data[4 + pos] = emg_ref_data[i] & 0xff;
+            }
+            NRF_TXSetData(send_data, (emg_data_pos * 5) + 1);
+            emg_data_pos = 0;
             NRF_TXTransmit();
         }
 
@@ -141,6 +146,11 @@ void ADC0_IRQHandler() {
         if (cnt >= 20) { // this is true each 20 cycles (runs at 999.45Hz)
             cnt = 0;
             MillisInterrupt();
+            if (emg_data_pos < 5) {
+                emg_dif_data[emg_data_pos] = ADC0->ULLMEM.MEMRES[1];
+                emg_ref_data[emg_data_pos] = ADC0->ULLMEM.MEMRES[2];
+                emg_data_pos++;
+            }
         }
         cnt++;
         break;
