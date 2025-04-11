@@ -91,9 +91,10 @@ class SerialPlotter(QtWidgets.QMainWindow):
         self.count_label = QLabel("Samples: 0")
         self.electrode_label = QLabel("Electrode Placement: --")
         self.battery_label = QLabel("Battery: --")
+        self.freq_label = QLabel("Freq: -- Hz")
 
         for lbl in [self.conn_label, self.rx_label, self.count_label,
-                    self.electrode_label, self.battery_label]:
+                    self.electrode_label, self.battery_label, self.freq_label]:
             lbl.setStyleSheet("font-size: 14px; padding: 4px;")
             left_layout.addWidget(lbl)
 
@@ -226,6 +227,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 self.data2.append(v2)
                 self.timestamps.append(t)
                 self.sample_count += 1
+                self.update_frequency()
                 i += 5
             elif self.buffer[i] == 0xff and i + 1 < len(self.buffer):
                 ext_type = self.buffer[i+1]
@@ -241,6 +243,13 @@ class SerialPlotter(QtWidgets.QMainWindow):
             else:
                 i += 1
         self.buffer = bytearray()
+
+    def update_frequency(self):
+        if len(self.timestamps) >= 2:
+            duration = self.timestamps[-1] - self.timestamps[0]
+            if duration > 0:
+                freq = len(self.timestamps) / duration
+                self.freq_label.setText(f"Freq: {freq:.1f} Hz")
 
     def update(self):
         if not self.connected:
