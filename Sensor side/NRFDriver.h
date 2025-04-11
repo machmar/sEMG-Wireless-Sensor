@@ -7,14 +7,18 @@
 typedef enum {
     State_TransmitWait,
     State_TransmitFailed,
-    State_TransmitSuccess
+    State_TransmitSuccess,
+    State_Transmit,
+    State_Receive,
+    State_ReceiveWait,
+    State_ReceiveReady
 } NRF_State_t;
 
 bool NRF_Init();
 
-void NRF_IRQHandler();
+NRF_State_t NRF_CheckState();
 
-void NRF_SPIHandler();
+NRF_State_t NRF_DirectionState();
 
 bool NRF_TXPipe(uint64_t address);
 
@@ -22,9 +26,16 @@ void NRF_TXSetData(uint8_t *dataSend, uint8_t len);
 
 void NRF_TXTransmit();
 
-NRF_State_t NRF_TXCheckAcks();
-
 bool NRF_TXCheckAcksBlocking();
 
+void NRF_RXStart();
+
+NRF_State_t NRF_RXGet(uint8_t *buffer);
+
+
+
+void NRF_IRQHandler();
+
+void NRF_SPIHandler();
 
 #endif

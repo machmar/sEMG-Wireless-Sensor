@@ -13,23 +13,37 @@ uint32_t volatile got_back_len_ = 0;
 
 bool volatile regsCorrect = true;
 uint32_t volatile failedReg = UINT32_MAX;
+bool interruptReceived = false;
+NRF_State_t directionsMode = State_Transmit;
+NRF_State_t receiveState = State_ReceiveWait;
 
-// TODO: make max retries also interrupt based
 /* TODO:
     make max retries also interrupt based
     make the set data function check if the previous data was sent out
 */
 
-void GoStandby() {
+void GoStandbyTX() {
     // clear interrupts, go to standby
     SPI_WAIT_TRANSFER_COMPLETE;
     HW_NRF_CS_CLR;
     SPI_DATA(0x27);
-    SPI_DATA(0x70); // clear all interrupt states
+    SPI_DATA(0x7E); // clear all interrupt states
     SPI_WAIT_TRANSFER_COMPLETE;
     HW_NRF_CS_CLR;
     SPI_DATA(0x20);
-    SPI_DATA(0x5E); // transmit, power up, 2 byte crc, enable crc, TX_DS interrupt enabled
+    SPI_DATA(0x4E); // transmit, power up, 2 byte crc, enable crc, TX_DS and MAX_RT interrupts enabled
+}
+
+void GoStandbyRX() {
+    // clear interrupts, go to standby
+    SPI_WAIT_TRANSFER_COMPLETE;
+    HW_NRF_CS_CLR;
+    SPI_DATA(0x27);
+    SPI_DATA(0x7E); // clear all interrupt states
+    SPI_WAIT_TRANSFER_COMPLETE;
+    HW_NRF_CS_CLR;
+    SPI_DATA(0x20);
+    SPI_DATA(0x3F); // receive, power up, 2 byte crc, enable crc, RX_DR interrupt enabled
 }
 
 void FlushFIFOTX() {
@@ -50,6 +64,8 @@ void FlushFIFOs() {
 }
 
 bool NRF_Init() {
+    directionsMode = State_Transmit;
+
     // init variables (something resets them at init)
     for (uint8_t i = 0; i < 32; i++) got_back_[i] = 0;
     got_back_len_ = 0;
@@ -117,7 +133,12 @@ bool NRF_Init() {
 }
 
 void NRF_IRQHandler() {
-    //nothing now
+    if (directionsMode == State_Transmit) {
+        interruptReceived = true;
+    }
+    else if (directionsMode == State_Receive) {
+        receiveState = State_ReceiveReady;
+    }
 }
 
 void NRF_SPIHandler() {
@@ -149,7 +170,7 @@ void NRF_SPIHandler() {
 bool NRF_TXPipe(uint64_t address) {
     uint8_t address_bytes[5];
 
-    GoStandby();
+    GoStandbyTX();
     FlushFIFOs();
 
     // set transmit address
@@ -201,8 +222,11 @@ bool NRF_TXPipe(uint64_t address) {
 }
 
 void NRF_TXSetData(uint8_t *dataSend, uint8_t len) {
+    HW_NRF_CE_CLR; // in case it was left on from waiting for receive
+    directionsMode = State_Transmit;
+
     // clear interrupts, go to standby
-    GoStandby();
+    GoStandbyTX();
 
     // flush TX fifo
     FlushFIFOs();
@@ -224,19 +248,30 @@ void NRF_TXTransmit() {
     HW_NRF_CE_CLR;
 }
 
-NRF_State_t NRF_TXCheckAcks() {
-    SPI_WAIT_TRANSFER_COMPLETE;
-    HW_NRF_CS_CLR;
-    SPI_DATA(0xff);
-    SPI_WAIT_TRANSFER_COMPLETE;
-    
-    if (got_back_[0] & 1 << 4) {
-        return State_TransmitFailed;
+NRF_State_t NRF_CheckState() {
+    if (directionsMode == State_Transmit) {
+        if (!interruptReceived) return State_TransmitWait;
+        interruptReceived = false;
+        SPI_WAIT_TRANSFER_COMPLETE;
+        HW_NRF_CS_CLR;
+        SPI_DATA(0xff);
+        SPI_WAIT_TRANSFER_COMPLETE;
+        
+        if (got_back_[0] & 1 << 4) {
+            return State_TransmitFailed;
+        }
+        else if (got_back_[0] & 1 << 5) {
+            return State_TransmitSuccess;
+        }
+        return State_TransmitWait;
     }
-    else if (got_back_[0] & 1 << 5) {
-        return State_TransmitSuccess;
+    else if (directionsMode == State_Receive) {
+        return receiveState;
     }
-    return State_TransmitWait;
+    else {
+        directionsMode = State_Transmit;
+        return State_Transmit;
+    }
 }
 
 bool NRF_TXCheckAcksBlocking() {
@@ -254,4 +289,42 @@ bool NRF_TXCheckAcksBlocking() {
         }
     }
     return false;
+}
+
+void NRF_RXStart() {
+    directionsMode = State_Receive;
+    HW_NRF_CE_CLR;
+    GoStandbyRX();
+    FlushFIFOs();
+    HW_NRF_CE_SET;
+    receiveState = State_ReceiveWait;
+}
+
+NRF_State_t NRF_DirectionState() {
+    return directionsMode;
+}
+
+NRF_State_t NRF_RXGet(uint8_t *buffer) {
+    if (receiveState == State_ReceiveWait) return State_ReceiveWait;
+    HW_NRF_CE_CLR;
+    HW_NRF_CS_CLR;
+    SPI_DATA(0x60);
+    SPI_DATA(0x00);
+    SPI_WAIT_TRANSFER_COMPLETE;
+    uint32_t dataWidth = got_back_[1];
+    HW_NRF_CS_CLR;
+    SPI_DATA(0x61);
+    for (uint32_t i = 0; i < dataWidth; i++) {
+        SPI_DATA(0x00);
+        SPI_WAIT_FIFO_NOT_FULL;
+    }
+    SPI_WAIT_TRANSFER_COMPLETE;
+
+    for (uint32_t i = 0; i < dataWidth; i++) {
+        buffer[i] = got_back_[i + 1];
+    }
+    
+    receiveState = State_ReceiveWait;
+    GoStandbyRX();
+    return State_ReceiveReady;
 }

@@ -46,6 +46,7 @@
 
 uint32_t cnt;
 uint8_t tmp_data_[32];
+uint8_t received_data[32];
 
 int main(void)
 {
@@ -62,6 +63,8 @@ int main(void)
     NVIC->ISER[0] = 1 << ADC0_INT_IRQn; // enable interrupts for ADC0
 
     MillisInit();
+
+    for (uint32_t i = 0; i < 32; i++) received_data[i] = 0;
 
     if (!NRF_Init()) {
         while(1) { // nrf init gone bad, stop dead
@@ -87,7 +90,7 @@ int main(void)
         }
 
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 5) {
+        if (Millis() - SendPMill >= 500) {
             SendPMill = Millis();
             uint8_t send_data[10];
             uint32_t diff = ADC0->ULLMEM.MEMRES[1];
@@ -99,7 +102,24 @@ int main(void)
             send_data[4] = ref & 0xff;
             NRF_TXSetData(send_data, 6);
             NRF_TXTransmit();
-            HW_LED_YEL_TGL;
+        }
+
+        NRF_State_t state = NRF_CheckState();
+        switch (state) {
+        case State_TransmitSuccess:
+            HW_LED_YEL_SET;
+            NRF_RXStart();
+            break;
+
+        case State_ReceiveReady:
+            NRF_RXGet(received_data);
+            //delay_cycles(1);
+            break;
+
+        case State_ReceiveWait:
+            HW_LED_YEL_CLR;
+            //delay_cycles(1);
+            break;
         }
     }
 }
