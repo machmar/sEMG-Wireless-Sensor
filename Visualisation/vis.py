@@ -236,7 +236,7 @@ class SerialPlotter(QtWidgets.QMainWindow):
             if self.buffer[i] == 0x00 and i + 4 < len(self.buffer):
                 v1 = (self.buffer[i+1] << 8) | self.buffer[i+2]
                 v2_raw = (self.buffer[i+3] << 8) | self.buffer[i+4]
-                v2 = v2_raw if v2_raw >= 50 else (self.data2[-1] if self.data2 else 0)
+                v2 = v2_raw if v2_raw >= 1000 else (self.data2[-1] if self.data2 else 0)
                 t = time.time() - self.start_time
                 self.data1.append(v1)
                 self.data2.append(v2)
