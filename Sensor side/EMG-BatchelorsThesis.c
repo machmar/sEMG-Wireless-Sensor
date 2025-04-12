@@ -107,7 +107,7 @@ int main(void)
         static uint8_t requestedType = 0;
         static uint8_t requestedTypeData = 0;
         static millis_t SendPMill = 0;
-        if (Millis() - SendPMill >= 1000 && !measurement_stopped_) {
+        if (Millis() - SendPMill >= 10 && !measurement_stopped_) {
             SendPMill = Millis();
             static uint8_t send_data[35] = {0};
             for (uint32_t i = 0; i < 5 && i < emg_data_pos; i++) {
