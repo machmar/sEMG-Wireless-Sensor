@@ -4,5 +4,6 @@ hopefully it's just the bad PCB
 something is up with the transmission still because in order to reliably transmit 25 bytes I have to send 26 bytes to the nrf chip
 this error is consitent for 1MHz and 2MHz
 
-
 also the app cannot handle 1kHz reliably so rn it's at 500Hz
+
+It just DOES NOT reply to requests, but if it puts them into the fifo itself, it works just fine, I can't figure it out.

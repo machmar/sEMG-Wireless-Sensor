@@ -56,6 +56,8 @@ uint32_t emg_data_pos = 0;
 bool measurement_stopped_ = false;
 bool electrodes_attachhed_ = false;
 
+void HandleStatusTransmit(uint8_t type, uint8_t data);
+
 int main(void)
 {
     delay_cycles(1000000); // leave room for the power to stabilize and all
@@ -120,40 +122,18 @@ int main(void)
             emg_data_pos = 0;
             NRF_TXTransmit();
         }
-        else if(TransmitFifo_Get(&requestedType, &requestedTypeData)) {
-            static uint8_t send_data[2] = {0};
-            switch(requestedType) {
-            case 0x01: // requested batterry level
-                send_data[0] = 0x01;
-                send_data[1] = ADC0->ULLMEM.MEMRES[1] >> (12 - 8);
-                NRF_TXSetData(send_data, 3);
-                NRF_TXTransmit();
-                break;
-
-            case 0x03: // requested a status of the electrode attachment
-                send_data[0] = 0x03;
-                send_data[1] = electrodes_attachhed_;
-                NRF_TXSetData(send_data, 3);
-                NRF_TXTransmit();
-                break;
-
-            case 0xfd: // alive check
-                send_data[0] = 0xfd;
-                NRF_TXSetData(send_data, 2);
-                NRF_TXTransmit();
-                break;
-
-            default: // don't care about them here
-                break;
-            }
-        }
 
         NRF_State_t state = NRF_CheckState();
         switch (state) {
         case State_TransmitFailed: // for now do nothing, just go into receive mode anyway
-        case State_TransmitSuccess:
+        case State_TransmitSuccess: // transmission is done, either send status thing, or go into receive
             HW_LED_YEL_SET;
-            NRF_RXStart();
+            if(TransmitFifo_Get(&requestedType, &requestedTypeData)) {
+                HandleStatusTransmit(requestedType, requestedTypeData);
+            }
+            else {
+                NRF_RXStart();
+            }
             break;
 
         case State_ReceiveReady:
@@ -200,8 +180,38 @@ int main(void)
 
         case State_ReceiveWait:
             HW_LED_YEL_CLR;
+            if(TransmitFifo_Get(&requestedType, &requestedTypeData))
+                HandleStatusTransmit(requestedType, requestedTypeData);
             break;
         }
+    }
+}
+
+void HandleStatusTransmit(uint8_t type, uint8_t data) {
+    static uint8_t send_data[2] = {0};
+    switch(type) {
+    case 0x01: // requested batterry level
+        send_data[0] = 0x01;
+        send_data[1] = ADC0->ULLMEM.MEMRES[1] >> (12 - 8);
+        NRF_TXSetData(send_data, 3);
+        NRF_TXTransmit();
+        break;
+
+    case 0x03: // requested a status of the electrode attachment
+        send_data[0] = 0x03;
+        send_data[1] = electrodes_attachhed_;
+        NRF_TXSetData(send_data, 3);
+        NRF_TXTransmit();
+        break;
+
+    case 0xfd: // alive check
+        send_data[0] = 0xfd;
+        NRF_TXSetData(send_data, 2);
+        NRF_TXTransmit();
+        break;
+
+    default: // don't care about them here
+        break;
     }
 }
 
