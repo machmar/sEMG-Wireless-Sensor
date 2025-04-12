@@ -230,11 +230,13 @@ class SerialPlotter(QtWidgets.QMainWindow):
         return [math.sqrt(sum(data[i - window_size:i]) / window_size) for i in range(window_size, len(data) + 1)]
 
     def parse_buffer(self):
+        # Electrode state packet handler: 0x03 + 0x00 (off) or 0x01 (on)
         i = 0
         while i < len(self.buffer):
             if self.buffer[i] == 0x00 and i + 4 < len(self.buffer):
                 v1 = (self.buffer[i+1] << 8) | self.buffer[i+2]
-                v2 = (self.buffer[i+3] << 8) | self.buffer[i+4]
+                v2_raw = (self.buffer[i+3] << 8) | self.buffer[i+4]
+                v2 = v2_raw if v2_raw >= 50 else (self.data2[-1] if self.data2 else 0)
                 t = time.time() - self.start_time
                 self.data1.append(v1)
                 self.data2.append(v2)
@@ -253,6 +255,11 @@ class SerialPlotter(QtWidgets.QMainWindow):
                 timestamp = time.strftime('%H:%M:%S')
                 self.log_box.append(f"[{timestamp}] {msg}")
                 self.log_box.verticalScrollBar().setValue(self.log_box.verticalScrollBar().maximum())
+            elif self.buffer[i] == 0x03 and i + 1 < len(self.buffer):
+                state = self.buffer[i + 1]
+                state_text = "Attached" if state == 0x01 else "Not Attached"
+                self.electrode_label.setText(f"Electrode Placement: {state_text}")
+                i += 2
             else:
                 i += 1
         self.buffer = bytearray()
