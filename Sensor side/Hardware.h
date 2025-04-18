@@ -19,5 +19,7 @@
 #define HW_NRF_CS_CLR (GPIOA->DOUTCLR31_0 = 1 << 4)
 #define HW_NRF_CE_SET (GPIOA->DOUTSET31_0 = 1 << 3)
 #define HW_NRF_CE_CLR (GPIOA->DOUTCLR31_0 = 1 << 3)
+#define HW_FLASH_CS_SET (GPIOA->DOUTSET31_0 = 1 << 15)
+#define HW_FLASH_CS_CLR (GPIOA->DOUTCLR31_0 = 1 << 15)
 
 #endif

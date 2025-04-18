@@ -37,6 +37,7 @@
 #include "ti/devices/msp/m0p/mspm0g110x.h"
 #include "Hardware.h"
 #include "NRFDriver.h"
+#include "Flash.h"
 #include "Millis.h"
 #include "TransmitFifo.h"
 #include <string.h>
@@ -66,7 +67,8 @@ int main(void)
     NVIC->ICPR[0] = 1 << GPIOA_INT_IRQn; // clear the interrupt state before enabling it
     NVIC->ISER[0] = 1 << GPIOA_INT_IRQn; // both ports fall into the same interrupt for some reason
     NVIC->ICPR[0] = 1 << SPI0_INT_IRQn; // clear the interrupt state before enabling it
-    NVIC->ISER[0] = 1 << SPI0_INT_IRQn; // enable interrupts for SPI0
+    NVIC->ISER[0] = 1 << SPI0_INT_IRQn; // enable interrupts for NRF-SPI
+    NVIC->ISER[0] = 1 << SPI1_INT_IRQn; // enable interrupts for Flash-SPI
 
     ADC0->ULLMEM.CTL1 |= 1 << 8; // start ADC conversions
     ADC0->ULLMEM.CPU_INT.ICLR = 0xffffffff; // clear adc0 interrupts before enabling them
@@ -81,6 +83,13 @@ int main(void)
         while(1) { // nrf init gone bad, stop dead
             HW_LED_RED_TGL;
             for (uint32_t i = 0; i < 200000; i++);
+        }
+    }
+
+    if (Flash_Init() == StateFlash_NotResponding) {
+        while(1) { // nrf init gone bad, stop dead
+            HW_LED_RED_TGL;
+            for (uint32_t i = 0; i < 400000; i++);
         }
     }
 
@@ -225,6 +234,10 @@ void GROUP1_IRQHandler() {
 
 void SPI0_IRQHandler() {
     NRF_SPIHandler();
+}
+
+void SPI1_IRQHandler() {
+    Flash_SPIHandler();
 }
 
 void ADC0_IRQHandler() {
