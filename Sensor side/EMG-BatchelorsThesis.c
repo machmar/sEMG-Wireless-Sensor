@@ -54,6 +54,8 @@ uint16_t emg_dif_data[5];
 uint16_t emg_ref_data[5];
 uint32_t emg_data_pos = 0;
 
+uint8_t flash_transfer_buffer[2560];
+
 bool measurement_stopped_ = false;
 bool electrodes_attachhed_ = false;
 
@@ -87,11 +89,51 @@ int main(void)
     }
 
     if (Flash_Init() == StateFlash_NotResponding) {
-        while(1) { // nrf init gone bad, stop dead
+        while(1) { // flash init gone bad, stop dead
             HW_LED_RED_TGL;
-            for (uint32_t i = 0; i < 400000; i++);
+            for (uint32_t i = 0; i < 4000000; i++);
         }
     }
+
+    // --- FLASH SPEED TEST ---
+    /*strcpy(flash_transfer_buffer, "Calm dusk (Text 1) settles over the valley, painting barns gold as crickets chirp and warm wind stirs the tall grass. Windows glow, supper aromas drift, and the sky hums softly with promise of restful dreams. Nightbirds weave faint silver arcs above Calm.");
+    HW_LED_YEL_SET;
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001100, 256);
+    strcpy(flash_transfer_buffer, "Morning mist (Text 2) rises from the river, veiling reeds and stones in pearl gray silence. Fishermen wait, gentle ripples glide, and distant bells mark the hour with soft chimes echoing across water and willow. Hope wakes in the cool hush. Quiet hearts!!");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001200, 256);
+    strcpy(flash_transfer_buffer, "After ten steps (Text 3) along the garden path, lavender and mint breathe their vivid perfumes. Bees drift lazily, wings humming chords of midsummer, while a stone bench invites a pause beneath the wide, whispering elm. Sunlight puddles across worn brick.");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001300, 256);
+    strcpy(flash_transfer_buffer, "A distant bell rings (Text 4) through the cloister hall, waking echoes that fade among arches and cool stone. Candles tremble, dust motes dance, and prayerful silence wraps the ancient walls like linen around a sleeping child. Peace lies in the hush Soft");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001400, 256);
+    strcpy(flash_transfer_buffer, "Twilight whispers (Text 5) across the lake, coloring still water with rose and violet. An owl stirs, wings brushing the cool air, while fireflies blink their tiny messages among reeds, scripting quiet wonder in living sparks. Night leans closer to listen.");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001500, 256);
+    strcpy(flash_transfer_buffer, "City neon throbs (Text 6) above wet pavement, reflecting kaleidoscopes of color in each shallow puddle. Horns blur, footsteps mingle, and a lone saxophone threads its blues between streetlights, weaving a midnight ode to restless dreams. Skies hum softly.");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001600, 256);
+    strcpy(flash_transfer_buffer, "Snowfall muffles (Text 7) the forest trail, layering branches in silent lace. Breath forms tiny clouds, crunch of boots steady, and the world retreats to white hush. A lone pine creaks gently, bowing beneath the quiet weight of winter light. Still sings!!");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001700, 256);
+    strcpy(flash_transfer_buffer, "Sailing northward (Text 8), the cutter slices through teal swells, canvas straining in crisp wind. Spray pearls the rails, gulls trace spirals overhead, and salt breathes its briny tales across the deck like ancient stories in motion. Horizon laughs. Anew");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001800, 256);
+    strcpy(flash_transfer_buffer, "In the market square (Text 9), spices swirl with chatter and bright cloth banners flutter overhead. Laughter meets barter, drums pulse, and children dart like swallows, weaving color through the sunlit chaos of trading day. Joy rises like smoke. Above Up");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001900, 256);
+    strcpy(flash_transfer_buffer, "Library lamps glow (Text 10) over rows of quiet minds, pages turning like soft wings. Dusty sunlight filters high windows, lending every word a hush of reverence as seekers drift among shelves, gathering sparks of thought for their own fires. Sparks rise.");
+    while(Flash_GetState() != StateFlash_Idle);
+    Flash_Write(flash_transfer_buffer, 0x001a00, 256);
+    while(Flash_GetState() != StateFlash_Idle);
+    HW_LED_YEL_CLR;*/
+
+    /*HW_LED_YEL_SET;
+    while(Flash_GetState() != StateFlash_Idle);
+    FlashState_t volatile tmp = Flash_Read(flash_transfer_buffer, 0x001100, 2560);
+    HW_LED_YEL_CLR;*/
 
     while (1) {
         
